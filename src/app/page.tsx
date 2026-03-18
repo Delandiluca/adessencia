@@ -5,6 +5,7 @@ import Image from 'next/image';
 import HeroSection from '@/components/landing/HeroSection';
 import PricingCards from '@/components/landing/PricingCards';
 import RegistrationForm from '@/components/landing/RegistrationForm';
+import LocationSection from '@/components/landing/LocationSection';
 import { TicketType } from '@/types/registration';
 
 const SCHEDULE = [
@@ -285,6 +286,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Location Section ────────────────────────────────────── */}
+      <LocationSection />
 
       {/* ── Footer ─────────────────────────────────────────────────── */}
       <footer
