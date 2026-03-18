@@ -32,18 +32,18 @@ const TIER_FEATURES = {
   ],
 };
 
-function CheckIcon({ highlight }: { highlight: boolean }) {
+function CheckIcon({ dark }: { dark: boolean }) {
   return (
     <div
       className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
       style={{
-        background: highlight ? 'rgba(201,151,58,0.2)' : 'rgba(255,255,255,0.08)',
+        background: dark ? 'rgba(201,151,58,0.25)' : 'rgba(30,58,95,0.08)',
       }}
     >
       <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
         <path
           d="M1 3l2 2 4-4"
-          stroke={highlight ? '#e0b460' : 'rgba(255,255,255,0.5)'}
+          stroke={dark ? '#e0b460' : '#1e3a5f'}
           strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -60,33 +60,32 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
         const tier = TICKET_TIERS[key];
         const isSelected = selectedTier === key;
         const isHighlighted = tier.highlight;
-        const isActive = isSelected || isHighlighted;
+        const isDark = isSelected || isHighlighted;
 
         return (
           <div
             key={key}
-            className="relative flex flex-col rounded-2xl transition-all duration-300 cursor-pointer"
+            className="relative flex flex-col rounded-2xl transition-all duration-300 cursor-pointer hover:-translate-y-1"
             style={{
-              background: isActive
-                ? 'linear-gradient(160deg, rgba(30,58,95,0.9) 0%, rgba(15,31,53,0.95) 100%)'
-                : 'rgba(255,255,255,0.03)',
+              background: isDark
+                ? 'linear-gradient(160deg, #1e3a5f 0%, #0f1f35 100%)'
+                : '#ffffff',
               border: isSelected
                 ? '1px solid rgba(201,151,58,0.6)'
                 : isHighlighted
-                ? '1px solid rgba(45,106,159,0.5)'
-                : '1px solid rgba(255,255,255,0.07)',
+                ? '1px solid rgba(30,58,95,0.4)'
+                : '1px solid #e5e7eb',
               boxShadow: isSelected
-                ? '0 0 0 1px rgba(201,151,58,0.3), 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)'
+                ? '0 0 0 2px rgba(201,151,58,0.25), 0 20px 48px rgba(30,58,95,0.2)'
                 : isHighlighted
-                ? '0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)'
-                : '0 4px 20px rgba(0,0,0,0.2)',
+                ? '0 20px 48px rgba(30,58,95,0.18)'
+                : '0 2px 12px rgba(30,58,95,0.06)',
               transform: isHighlighted ? 'scale(1.03)' : 'scale(1)',
-              backdropFilter: 'blur(12px)',
             }}
             onClick={() => onSelect(key)}
           >
             {/* Popular badge */}
-            {isHighlighted && (
+            {isHighlighted && !isSelected && (
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
                 <span
                   className="inline-block px-4 py-1 rounded-full text-xs font-semibold font-body tracking-wide text-white"
@@ -114,11 +113,14 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
               <div className="mb-5">
                 <h3
                   className="font-display font-semibold mb-1"
-                  style={{ fontSize: '1.5rem', color: 'white' }}
+                  style={{ fontSize: '1.5rem', color: isDark ? '#ffffff' : '#1e3a5f' }}
                 >
                   {tier.label}
                 </h3>
-                <p className="text-sm font-body" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                <p
+                  className="text-sm font-body"
+                  style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#6b7280' }}
+                >
                   {tier.description}
                 </p>
               </div>
@@ -126,19 +128,25 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
               {/* Price */}
               <div className="mb-5">
                 <div className="flex items-end gap-1 mb-2">
-                  <span className="font-body text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  <span
+                    className="font-body text-sm"
+                    style={{ color: isDark ? 'rgba(255,255,255,0.4)' : '#9ca3af' }}
+                  >
                     R$
                   </span>
                   <span
                     className="font-display font-light leading-none"
                     style={{
                       fontSize: '3.2rem',
-                      color: isActive ? '#e0b460' : 'rgba(255,255,255,0.85)',
+                      color: isDark ? '#e0b460' : '#1e3a5f',
                     }}
                   >
                     {tier.price / 100}
                   </span>
-                  <span className="font-body text-sm mb-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  <span
+                    className="font-body text-sm mb-1"
+                    style={{ color: isDark ? 'rgba(255,255,255,0.4)' : '#9ca3af' }}
+                  >
                     ,00
                   </span>
                 </div>
@@ -148,8 +156,8 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
                     className="inline-block text-xs font-body font-medium px-2.5 py-0.5 rounded-full"
                     style={{
                       background: 'rgba(201,151,58,0.15)',
-                      color: '#e0b460',
-                      border: '1px solid rgba(201,151,58,0.25)',
+                      color: '#c9973a',
+                      border: '1px solid rgba(201,151,58,0.3)',
                     }}
                   >
                     {tier.savings}
@@ -160,17 +168,17 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
               {/* Divider */}
               <div
                 className="mb-5 h-px"
-                style={{ background: 'rgba(255,255,255,0.06)' }}
+                style={{ background: isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6' }}
               />
 
               {/* Features */}
               <ul className="space-y-2.5 flex-1 mb-6">
                 {TIER_FEATURES[key].map((feature, i) => (
                   <li key={i} className="flex items-center gap-2.5">
-                    <CheckIcon highlight={isActive} />
+                    <CheckIcon dark={isDark} />
                     <span
                       className="text-sm font-body"
-                      style={{ color: isActive ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.4)' }}
+                      style={{ color: isDark ? 'rgba(255,255,255,0.75)' : '#4b5563' }}
                     >
                       {feature}
                     </span>
@@ -183,22 +191,17 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
                 onClick={(e) => { e.stopPropagation(); onSelect(key); }}
                 className="w-full rounded-xl py-3 text-sm font-semibold font-body transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 style={
-                  isSelected
+                  isDark
                     ? {
                         background: 'linear-gradient(135deg, #c9973a, #e0b460)',
                         color: 'white',
                         boxShadow: '0 4px 20px rgba(201,151,58,0.4)',
                       }
-                    : isHighlighted
-                    ? {
-                        background: 'linear-gradient(135deg, #c9973a, #e0b460)',
-                        color: 'white',
-                        boxShadow: '0 4px 20px rgba(201,151,58,0.3)',
-                      }
                     : {
-                        background: 'rgba(255,255,255,0.06)',
-                        color: 'rgba(255,255,255,0.7)',
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        background: '#f8f7f5',
+                        color: '#1e3a5f',
+                        border: '1px solid #e5e7eb',
+                        fontWeight: 600,
                       }
                 }
               >

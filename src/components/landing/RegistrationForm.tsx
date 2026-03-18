@@ -41,10 +41,10 @@ function StepIndicator({ current }: { current: Step }) {
               className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold font-body transition-all duration-300"
               style={
                 current === s.num
-                  ? { background: 'rgba(201,151,58,0.9)', color: 'white', boxShadow: '0 0 0 4px rgba(201,151,58,0.2)' }
+                  ? { background: '#c9973a', color: 'white', boxShadow: '0 0 0 4px rgba(201,151,58,0.2)' }
                   : current > s.num
                   ? { background: '#c9973a', color: 'white' }
-                  : { background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.35)' }
+                  : { background: '#f3f4f6', color: '#9ca3af' }
               }
             >
               {current > s.num ? (
@@ -55,7 +55,7 @@ function StepIndicator({ current }: { current: Step }) {
             </div>
             <span
               className="text-[10px] font-body mt-1 whitespace-nowrap"
-              style={{ color: current === s.num ? '#e0b460' : 'rgba(255,255,255,0.3)', fontWeight: current === s.num ? 600 : 400 }}
+              style={{ color: current === s.num ? '#c9973a' : '#9ca3af', fontWeight: current === s.num ? 600 : 400 }}
             >
               {s.label}
             </span>
@@ -95,7 +95,7 @@ function Counter({
       >
         −
       </button>
-      <span className="font-display text-2xl font-light text-white w-6 text-center">{value}</span>
+      <span className="font-display text-2xl font-light text-navy w-6 text-center">{value}</span>
       <button
         type="button"
         onClick={() => onChange(Math.min(max, value + 1))}
@@ -115,15 +115,15 @@ function TierBadge({ tier, totalCents }: { tier: TicketType; totalCents: number 
   return (
     <div
       className="flex items-center justify-between rounded-xl px-4 py-3 mb-6"
-      style={{ background: 'rgba(201,151,58,0.07)', border: '1px solid rgba(201,151,58,0.2)' }}
+      style={{ background: 'rgba(201,151,58,0.06)', border: '1px solid rgba(201,151,58,0.2)' }}
     >
       <div>
-        <p className="text-xs font-body mb-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>Ingresso selecionado</p>
-        <p className="font-display font-semibold text-white text-lg leading-none">{t.label}</p>
-        <p className="text-xs font-body mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{t.description}</p>
+        <p className="text-xs font-body mb-0.5" style={{ color: '#9ca3af' }}>Ingresso selecionado</p>
+        <p className="font-display font-semibold text-navy text-lg leading-none">{t.label}</p>
+        <p className="text-xs font-body mt-0.5" style={{ color: '#9ca3af' }}>{t.description}</p>
       </div>
       <div className="text-right">
-        <span className="font-display text-2xl font-light" style={{ color: '#e0b460' }}>{formatReais(totalCents)}</span>
+        <span className="font-display text-2xl font-light" style={{ color: '#c9973a' }}>{formatReais(totalCents)}</span>
       </div>
     </div>
   );
@@ -157,7 +157,7 @@ function PixResult({ pixQrCode, pixQrCodeBase64 }: { pixQrCode: string; pixQrCod
           <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
       </div>
-      <h3 className="font-display text-xl font-semibold text-white mb-1">PIX gerado!</h3>
+      <h3 className="font-display text-xl font-semibold text-navy mb-1">PIX gerado!</h3>
       <p className="text-sm font-body text-gray-600 mb-4">
         Escaneie o QR Code ou copie o código. Expira em:
       </p>
@@ -227,7 +227,7 @@ function BoletoResult({ boletoUrl, barcode }: { boletoUrl?: string; barcode?: st
           </svg>
         </div>
         <div>
-          <h3 className="font-display text-xl font-semibold text-white">Boleto gerado!</h3>
+          <h3 className="font-display text-xl font-semibold text-navy">Boleto gerado!</h3>
           <p className="text-xs font-body text-gray-500">Vencimento: 3 de Abril de 2026</p>
         </div>
       </div>
@@ -408,12 +408,10 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
   return (
     <div ref={formRef} className="max-w-lg mx-auto px-4">
       <div
-        className="rounded-2xl p-6 md:p-8"
+        className="rounded-2xl p-6 md:p-8 bg-white"
         style={{
-          background: 'rgba(255,255,255,0.04)',
-          border: '1px solid rgba(255,255,255,0.09)',
-          backdropFilter: 'blur(16px)',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 8px 40px rgba(30,58,95,0.08)',
         }}
       >
         <StepIndicator current={step} />
@@ -423,7 +421,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
         )}
 
         {error && (
-          <div className="mb-4 rounded-xl px-4 py-3 text-sm font-body flex items-start gap-2" style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' }}>
+          <div className="mb-4 rounded-xl px-4 py-3 text-sm font-body flex items-start gap-2" style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 mt-0.5">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
@@ -437,7 +435,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
         {step === 1 && (
           <div className="space-y-4 animate-fade-in">
             <div>
-              <label className="block text-xs font-semibold font-body mb-1.5 tracking-wide uppercase" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              <label className="block text-xs font-semibold font-body mb-1.5 tracking-wide uppercase" style={{ color: '#6b7280' }}>
                 Nome Completo *
               </label>
               <input
@@ -450,7 +448,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold font-body mb-1.5 tracking-wide uppercase" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              <label className="block text-xs font-semibold font-body mb-1.5 tracking-wide uppercase" style={{ color: '#6b7280' }}>
                 E-mail *
               </label>
               <input
@@ -462,7 +460,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold font-body mb-1.5 tracking-wide uppercase" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              <label className="block text-xs font-semibold font-body mb-1.5 tracking-wide uppercase" style={{ color: '#6b7280' }}>
                 WhatsApp *
               </label>
               <input
@@ -476,7 +474,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
 
             {!selectedTier && (
               <div>
-                <label className="block text-xs font-semibold font-body mb-1.5 tracking-wide uppercase" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                <label className="block text-xs font-semibold font-body mb-1.5 tracking-wide uppercase" style={{ color: '#6b7280' }}>
                   Tipo de Ingresso *
                 </label>
                 <select
@@ -505,10 +503,10 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
         {step === 2 && (
           <div className="animate-fade-in">
             <div className="mb-5">
-              <h3 className="font-display text-xl font-semibold text-white mb-1">
+              <h3 className="font-display text-xl font-semibold text-navy mb-1">
                 Quem vai participar?
               </h3>
-              <p className="text-sm font-body" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              <p className="text-sm font-body" style={{ color: '#6b7280' }}>
                 Informe os nomes dos adultos (13+). Crianças até 12 anos entram grátis.
               </p>
             </div>
@@ -519,7 +517,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
                 const isExtra = i >= baseMaxAdults;
                 return (
                   <div key={i}>
-                    <label className="block text-xs font-semibold font-body mb-1.5 tracking-wide uppercase" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    <label className="block text-xs font-semibold font-body mb-1.5 tracking-wide uppercase" style={{ color: '#6b7280' }}>
                       {isExtra
                         ? `Adulto extra ${i - baseMaxAdults + 1} — ${formatReais(EXTRA_ADULT_PRICE_CENTS)}`
                         : `Adulto ${i + 1}${i === 0 ? ' (você)' : totalAdultSlots > 1 ? ' (opcional)' : ''}`}
@@ -596,7 +594,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
               className="rounded-xl px-4 py-3 mb-5 flex items-center justify-between"
               style={{ background: 'rgba(30,58,95,0.05)', border: '1px solid rgba(30,58,95,0.1)' }}
             >
-              <div className="text-sm font-body" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              <div className="text-sm font-body" style={{ color: '#4b5563' }}>
                 <span>{totalAdultSlots} adulto{totalAdultSlots !== 1 ? 's' : ''}</span>
                 {formData.children_count > 0 && (
                   <span className="ml-2 text-emerald-600">
@@ -604,7 +602,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
                   </span>
                 )}
               </div>
-              <span className="font-display text-xl font-semibold text-white">
+              <span className="font-display text-xl font-semibold text-navy">
                 {formatReais(totalCents)}
               </span>
             </div>
@@ -613,7 +611,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
               <button
                 onClick={() => goToStep(1)}
                 className="flex-1 rounded-xl py-3 text-sm font-semibold font-body transition-all duration-200"
-                style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.08)' }}
+                style={{ background: '#f3f4f6', color: '#6b7280', border: '1px solid #e5e7eb' }}
               >
                 ← Voltar
               </button>
@@ -640,8 +638,8 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
             ) : (
               <div>
                 <div className="mb-4">
-                  <h3 className="font-display text-xl font-semibold text-white mb-1">Pagamento</h3>
-                  <p className="text-sm font-body" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  <h3 className="font-display text-xl font-semibold text-navy mb-1">Pagamento</h3>
+                  <p className="text-sm font-body" style={{ color: '#6b7280' }}>
                     Escolha sua forma de pagamento preferida.
                   </p>
                 </div>
@@ -667,7 +665,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
                 </div>
 
                 {loading && (
-                  <div className="flex items-center justify-center gap-2 py-4 text-sm font-body" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  <div className="flex items-center justify-center gap-2 py-4 text-sm font-body" style={{ color: '#9ca3af' }}>
                     <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                     </svg>
@@ -684,7 +682,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
                 <button
                   onClick={() => goToStep(2)}
                   className="mt-4 w-full rounded-xl py-2.5 text-sm font-body transition-all duration-200"
-                  style={{ color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
+                  style={{ color: '#6b7280', background: '#f3f4f6', border: '1px solid #e5e7eb' }}
                 >
                   ← Voltar
                 </button>
@@ -694,7 +692,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
         )}
 
         {step === 3 && !paymentResult && (
-          <div className="mt-4 flex items-center justify-center gap-2 text-xs font-body" style={{ color: 'rgba(255,255,255,0.25)' }}>
+          <div className="mt-4 flex items-center justify-center gap-2 text-xs font-body" style={{ color: '#9ca3af' }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
