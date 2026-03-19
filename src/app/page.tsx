@@ -86,7 +86,7 @@ export default function LandingPage() {
       <HeroSection />
 
       {/* ── A Programação do Dia ─────────────────────────────────────── */}
-      <section className="py-24 px-6" style={{ background: '#ffffff' }}>
+      <section className="py-28 px-6" style={{ background: '#ffffff' }}>
         <div className="max-w-4xl mx-auto">
 
           {/* Heading */}
@@ -113,7 +113,7 @@ export default function LandingPage() {
               style={{ background: 'linear-gradient(to bottom, transparent, #e5e7eb 5%, #e5e7eb 95%, transparent)' }}
             />
 
-            <div className="space-y-2">
+            <div className="space-y-4">
               {SCHEDULE.map((item, i) => (
                 <div key={i} className="flex items-start gap-6 group">
                   {/* Dot */}
@@ -162,11 +162,11 @@ export default function LandingPage() {
       </section>
 
       {/* ── O que está incluso ───────────────────────────────────────── */}
-      <section className="py-24 px-6" style={{ background: '#faf9f7', borderTop: '1px solid #f0ede8', borderBottom: '1px solid #f0ede8' }}>
+      <section className="py-28 px-6" style={{ background: '#faf9f7', borderTop: '1px solid #f0ede8', borderBottom: '1px solid #f0ede8' }}>
         <div className="max-w-5xl mx-auto">
 
           {/* Heading */}
-          <div className="text-center mb-5">
+          <div className="text-center mb-16">
             <p className="text-xs font-body font-semibold tracking-[0.35em] uppercase mb-3" style={{ color: '#c9973a' }}>
               Incluso no ingresso
             </p>
@@ -185,11 +185,11 @@ export default function LandingPage() {
           </div>
 
           {/* Cards grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-14">
             {INCLUDED.map((item, i) => (
               <div
                 key={i}
-                className="group flex flex-col items-start p-6 rounded-2xl bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                className="group flex flex-col items-start p-7 rounded-2xl bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                 style={{
                   boxShadow: '0 2px 12px rgba(30,58,95,0.06)',
                   border: '1px solid #f0ede8',
@@ -238,7 +238,7 @@ export default function LandingPage() {
       {/* ── Inscrição e Ingressos ───────────────────────────────────── */}
       <section
         id="inscricao"
-        className="py-24 px-6"
+        className="py-28 px-6"
         style={{ background: '#ffffff' }}
       >
         <div className="max-w-5xl mx-auto">
@@ -293,7 +293,7 @@ export default function LandingPage() {
 
       {/* ── Footer ─────────────────────────────────────────────────── */}
       <footer
-        className="py-16 px-6"
+        className="py-20 px-6"
         style={{
           background: '#faf9f7',
           borderTop: '1px solid #e5e7eb',
@@ -319,7 +319,7 @@ export default function LandingPage() {
                 <p className="font-body font-semibold text-xs tracking-widest uppercase mb-2" style={{ color: '#c9973a' }}>
                   Evento
                 </p>
-                <p className="font-body text-sm text-navy">Um Dia com Deus</p>
+                <p className="font-body text-sm text-navy">Domingo Essencial</p>
                 <p className="font-body text-sm mt-1" style={{ color: '#9ca3af' }}>5 de Abril de 2026</p>
               </div>
               <div>

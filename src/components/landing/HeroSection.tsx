@@ -126,7 +126,7 @@ export default function HeroSection() {
             animationDelay: '0.3s',
           }}
         >
-          Um Dia com Deus
+          Domingo Essencial
           <br />
           <em style={{ fontStyle: 'italic' }}>Adoração &amp; Comunhão</em>
         </h1>

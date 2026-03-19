@@ -19,11 +19,11 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Um Dia com Deus 2026 — Essência da Adoração',
+  title: 'Domingo Essencial 2026 — Essência da Adoração',
   description:
-    'Um dia inteiro na igreja dedicado à adoração, comunhão e encontro com Deus. 5 de Abril de 2026 — Assembleia de Deus Essência da Adoração, Cachoeiro de Itapemirim. Todas as refeições incluídas. Garanta sua vaga!',
+    'Um dia inteiro dedicado à adoração, comunhão e encontro com Deus. 5 de Abril de 2026 — Assembleia de Deus Essência da Adoração, Cachoeiro de Itapemirim. Todas as refeições incluídas. Garanta sua vaga!',
   openGraph: {
-    title: 'Um Dia com Deus 2026 — Essência da Adoração',
+    title: 'Domingo Essencial 2026 — Essência da Adoração',
     description:
       'Um dia inteiro de adoração, comunhão e Palavra. 5 de Abril · Cachoeiro de Itapemirim · Todas as refeições incluídas.',
     type: 'website',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Retiro de Adoração e Comunhão 2026 — Essência da Adoração',
+    title: 'Domingo Essencial 2026 — Essência da Adoração',
     description: 'Um dia inteiro de adoração, comunhão e Palavra. 5 de Abril · Cachoeiro de Itapemirim.',
   },
 };
