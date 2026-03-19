@@ -1,47 +1,81 @@
 'use client';
 
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
+
+const SLIDES = [
+  '/church-1.JPG',
+  '/church-2.jpeg',
+  '/church-3.JPG',
+  '/church-4.JPG',
+  '/church-5.JPG',
+  '/church-6.jpg',
+  '/church-7.jpg',
+  '/church-8.JPG',
+  '/church-9.JPG',
+  '/church-10.JPG',
+  '/church-11.jpg',
+  '/church-12.JPG',
+  '/church-13.JPG',
+];
+
+const INTERVAL_MS = 5000;
 
 export default function HeroSection() {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCurrent((c) => (c + 1) % SLIDES.length);
+    }, INTERVAL_MS);
+    return () => clearInterval(id);
+  }, []);
+
   const scrollToForm = () => {
     document.getElementById('inscricao')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <section
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
-    >
-      {/* Background: photo-ready, falls back to deep navy gradient */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: "url('/hero.jpg')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundColor: '#0a1628',
-        }}
-      />
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
 
-      {/* Dark overlay — slightly lighter at center to feel like light source */}
+      {/* ── Slideshow background — CSS background-image approach ─────── */}
+      {SLIDES.map((src, i) => (
+        <div
+          key={src}
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url('${src}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center top',
+            opacity: i === current ? 1 : 0,
+            transition: 'opacity 1.2s ease-in-out',
+            zIndex: 0,
+          }}
+        />
+      ))}
+
+      {/* Dark overlay */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(160deg, rgba(8,18,36,0.9) 0%, rgba(20,46,85,0.78) 50%, rgba(8,18,36,0.92) 100%)',
+            'linear-gradient(160deg, rgba(8,18,36,0.82) 0%, rgba(20,46,85,0.65) 50%, rgba(8,18,36,0.88) 100%)',
+          zIndex: 1,
         }}
       />
 
       {/* Gold top border */}
       <div
-        className="absolute top-0 left-0 right-0 h-[2px] z-10"
+        className="absolute top-0 left-0 right-0 h-[2px]"
         style={{
           background:
             'linear-gradient(90deg, transparent, #c9973a 25%, #e0b460 50%, #c9973a 75%, transparent)',
+          zIndex: 2,
         }}
       />
 
       {/* ── Main content ─────────────────────────────────────────────── */}
-      <div className="relative z-10 text-center px-6 max-w-4xl mx-auto w-full">
+      <div className="relative text-center px-6 max-w-4xl mx-auto w-full" style={{ zIndex: 2 }}>
 
         {/* Logo + church tag */}
         <div
@@ -92,9 +126,9 @@ export default function HeroSection() {
             animationDelay: '0.3s',
           }}
         >
-          Dia de Adoração
+          Um Dia com Deus
           <br />
-          <em style={{ fontStyle: 'italic' }}>&amp; Comunhão</em>
+          <em style={{ fontStyle: 'italic' }}>Adoração &amp; Comunhão</em>
         </h1>
 
         {/* Date + Location badges */}
@@ -168,14 +202,32 @@ export default function HeroSection() {
           </p>
         </div>
 
+        {/* Slide dots */}
+        <div className="flex justify-center gap-2 mt-10">
+          {SLIDES.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              aria-label={`Foto ${i + 1}`}
+              className="transition-all duration-300 rounded-full"
+              style={{
+                width:      i === current ? 20 : 7,
+                height:     7,
+                background: i === current ? '#e0b460' : 'rgba(255,255,255,0.35)',
+                border:     'none',
+                cursor:     'pointer',
+                padding:    0,
+              }}
+            />
+          ))}
+        </div>
+
         {/* Scroll indicator */}
         <div
-          className="mt-14 animate-fade-in"
+          className="mt-10 animate-fade-in"
           style={{ opacity: 0, animationDelay: '1.3s' }}
         >
-          <div
-            className="w-5 h-8 rounded-full border border-white/20 mx-auto flex items-start justify-center pt-1.5"
-          >
+          <div className="w-5 h-8 rounded-full border border-white/20 mx-auto flex items-start justify-center pt-1.5">
             <div
               className="w-1 h-2 rounded-full bg-white/40"
               style={{ animation: 'scrollBob 1.8s ease-in-out infinite' }}
@@ -187,7 +239,10 @@ export default function HeroSection() {
       {/* Bottom blend into white page */}
       <div
         className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none"
-        style={{ background: 'linear-gradient(to bottom, transparent, #ffffff)' }}
+        style={{
+          background: 'linear-gradient(to bottom, transparent, #ffffff)',
+          zIndex: 2,
+        }}
       />
     </section>
   );

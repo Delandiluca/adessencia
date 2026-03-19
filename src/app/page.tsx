@@ -9,12 +9,13 @@ import LocationSection from '@/components/landing/LocationSection';
 import { TicketType } from '@/types/registration';
 
 const SCHEDULE = [
-  { time: '08:00', label: 'Café da Manhã de Boas-vindas',   icon: '☕', desc: 'Abertura com acolhimento e café' },
-  { time: '09:30', label: 'Bloco de Adoração e Palavra',    icon: '🎵', desc: 'Louvor coletivo e ministração' },
-  { time: '12:30', label: 'Almoço em Comunhão',             icon: '🍽️', desc: 'Refeição compartilhada em família' },
-  { time: '14:30', label: 'Oficinas e Dinâmicas',           icon: '✨', desc: 'Atividades de edificação' },
-  { time: '16:30', label: 'Café da Tarde',                  icon: '☕', desc: 'Pausa e conexão entre irmãos' },
-  { time: '19:00', label: 'Celebração de Encerramento e Jantar', icon: '🌙', desc: 'Momento final de adoração e jantar' },
+  { time: '06:00', label: 'Consagração da Manhã',           icon: '🙏', desc: 'Início do dia dedicado a Deus' },
+  { time: '08:00', label: 'Escola Bíblica Dominical (EBD)', icon: '📖', desc: 'Ensinamento e estudo da Palavra' },
+  { time: '09:30', label: 'Louvor e Adoração',              icon: '🎵', desc: 'Momento contínuo de louvor ao longo do dia' },
+  { time: '12:00', label: 'Pausa para Alimentação',         icon: '🍽️', desc: 'Momento de descanso e comunhão' },
+  { time: '14:00', label: 'Continuação de Louvor e Adoração', icon: '✨', desc: 'Edificação e buscando a face de Deus' },
+  { time: '17:00', label: 'Pausa com Café da Tarde',        icon: '☕', desc: 'Descanso e comunhão entre irmãos' },
+  { time: '19:00', label: 'Encerramento com Jantar',        icon: '🌙', desc: 'Encerramento do dia em adoração' },
 ];
 
 const INCLUDED = [
@@ -304,11 +305,11 @@ export default function LandingPage() {
             {/* Brand */}
             <div className="flex flex-col items-center md:items-start gap-3">
               <Image
-                src="/IMG_9069.png"
+                src="/IMG_9077.png"
                 alt="Essência da Adoração — Assembleia de Deus"
-                width={120}
-                height={160}
-                style={{ objectFit: 'contain', opacity: 0.85 }}
+                width={64}
+                height={64}
+                style={{ objectFit: 'contain', opacity: 0.9 }}
               />
             </div>
 
@@ -318,7 +319,7 @@ export default function LandingPage() {
                 <p className="font-body font-semibold text-xs tracking-widest uppercase mb-2" style={{ color: '#c9973a' }}>
                   Evento
                 </p>
-                <p className="font-body text-sm text-navy">Retiro de Adoração e Comunhão</p>
+                <p className="font-body text-sm text-navy">Um Dia com Deus</p>
                 <p className="font-body text-sm mt-1" style={{ color: '#9ca3af' }}>5 de Abril de 2026</p>
               </div>
               <div>

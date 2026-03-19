@@ -10,7 +10,7 @@ export default function LocationSection() {
             Como Chegar
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Nos encontre no endereço abaixo. Estamos abertos e ansiosos para recebê-lo no dia do retiro.
+            Nos encontre no endereço abaixo. Estaremos juntos o dia todo em adoração e comunhão.
           </p>
         </div>
 
@@ -18,7 +18,7 @@ export default function LocationSection() {
           {/* Map Embed */}
           <div className="rounded-2xl overflow-hidden shadow-xl h-[400px] lg:h-[500px]">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3739.1234567890!2d-41.1119!3d-20.8397!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjDCsDUwJzIyLjYiUyA0McKB'MDYnNDEuOCJX!5e0!3m2!1spt-BR!2sbr!4v1234567890"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3740.7640589623!2d-41.109873!3d-20.837421!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0:0x0!2zMjDCsDUwJzE2LjMiUyA0McKAwwowJzM1LjkiVw!5e0!3m2!1spt-BR!2sbr!4v1710756000000"
               width="100%"
               height="100%"
               style={{ border: 0 }}
@@ -42,7 +42,7 @@ export default function LocationSection() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    Local do Retiro
+                    Local do Evento
                   </h3>
                   <p className="text-gray-700 leading-relaxed">
                     <span className="font-semibold">Assembleia de Deus Essência da Adoração</span>
@@ -80,14 +80,14 @@ export default function LocationSection() {
               </p>
             </div>
 
-            {/* Date Reminder */}
+            {/* Day Info */}
             <div className="bg-amber-100 rounded-lg p-6 border border-amber-300">
               <p className="text-center">
                 <span className="block text-2xl font-bold text-amber-900 mb-1">
-                  05 de Abril de 2026
+                  Um Dia com Deus
                 </span>
                 <span className="text-sm text-amber-700">
-                  Chegue com antecedência — café começa às 08:00
+                  Comece cedo — consagração às 06:00 da manhã
                 </span>
               </p>
             </div>
