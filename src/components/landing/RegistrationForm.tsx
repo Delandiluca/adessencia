@@ -7,7 +7,8 @@ import { TicketType } from '@/types/registration';
 import { TICKET_TIERS, calculateTotalCents, getPriceInReais, formatReais, EXTRA_ADULT_PRICE_CENTS } from '@/lib/utils/pricing';
 import { CheckoutResponse } from '@/types/registration';
 
-const PaymentBrick = dynamic(() => import('./PaymentBrick'), { ssr: false });
+const PagSeguroCheckout = dynamic(() => import('./PagSeguroCheckout'), { ssr: false });
+import type { PagSeguroPayload } from './PagSeguroCheckout';
 
 interface RegistrationFormProps {
   selectedTier: TicketType | null;
@@ -130,15 +131,44 @@ function TierBadge({ tier, totalCents }: { tier: TicketType; totalCents: number 
 }
 
 // ─── PIX Result ───────────────────────────────────────────────────────────────
-function PixResult({ pixQrCode, pixQrCodeBase64 }: { pixQrCode: string; pixQrCodeBase64?: string }) {
+function PixResult({
+  pixQrCode,
+  pixQrCodeBase64,
+  registrationId,
+}: {
+  pixQrCode: string;
+  pixQrCodeBase64?: string;
+  registrationId?: string;
+}) {
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [seconds, setSeconds] = useState(30 * 60);
+  const [checking, setChecking] = useState(false);
 
+  // Contagem regressiva
   useEffect(() => {
     if (seconds <= 0) return;
     const t = setTimeout(() => setSeconds((s) => s - 1), 1000);
     return () => clearTimeout(t);
   }, [seconds]);
+
+  // Polling automático a cada 8s para detectar pagamento
+  useEffect(() => {
+    if (!registrationId) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/checkout/status?id=${registrationId}`);
+        const data = await res.json();
+        if (data.status === 'confirmed') {
+          clearInterval(interval);
+          router.push('/obrigado');
+        }
+      } catch {
+        // silencioso
+      }
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [registrationId, router]);
 
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
   const ss = String(seconds % 60).padStart(2, '0');
@@ -147,6 +177,20 @@ function PixResult({ pixQrCode, pixQrCodeBase64 }: { pixQrCode: string; pixQrCod
     await navigator.clipboard.writeText(pixQrCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const checkNow = async () => {
+    if (!registrationId) return;
+    setChecking(true);
+    try {
+      const res = await fetch(`/api/checkout/status?id=${registrationId}`);
+      const data = await res.json();
+      if (data.status === 'confirmed') {
+        router.push('/obrigado');
+      }
+    } finally {
+      setChecking(false);
+    }
   };
 
   return (
@@ -179,28 +223,33 @@ function PixResult({ pixQrCode, pixQrCodeBase64 }: { pixQrCode: string; pixQrCod
       )}
       <button
         onClick={copy}
-        className="w-full rounded-xl py-3 text-sm font-semibold font-body transition-all duration-200 flex items-center justify-center gap-2"
+        className="w-full rounded-xl py-3 text-sm font-semibold font-body transition-all duration-200 flex items-center justify-center gap-2 mb-3"
         style={{ background: copied ? '#10b981' : '#1e3a5f', color: 'white' }}
       >
         {copied ? (
           <>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
             Copiado!
           </>
         ) : (
           <>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="9" y="9" width="13" height="13" rx="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
             Copiar código PIX
           </>
         )}
       </button>
+      {registrationId && (
+        <button
+          onClick={checkNow}
+          disabled={checking}
+          className="w-full rounded-xl py-2.5 text-sm font-semibold font-body transition-all duration-200 flex items-center justify-center gap-2"
+          style={{ background: 'rgba(16,185,129,0.1)', color: '#059669', border: '1px solid rgba(16,185,129,0.3)' }}
+        >
+          {checking ? 'Verificando...' : '✓ Já paguei — verificar confirmação'}
+        </button>
+      )}
       <p className="text-xs font-body text-gray-500 mt-4">
-        Você receberá um e-mail de confirmação após o pagamento ser processado automaticamente.
+        A confirmação é automática. Você receberá um e-mail após o pagamento.
       </p>
     </div>
   );
@@ -357,7 +406,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
     setTimeout(scrollToTop, 50);
   };
 
-  const handlePaymentSubmit = async (mpFormData: unknown) => {
+  const handlePaymentSubmit = async (psPayload: PagSeguroPayload) => {
     setLoading(true);
     setError(null);
     try {
@@ -366,7 +415,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
         : 0;
 
       const payload = {
-        ...(mpFormData as object),
+        ...psPayload,
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
@@ -374,10 +423,6 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
         participant_names: formData.participant_names.filter((n) => n.trim().length > 0),
         children_count: formData.children_count,
         transaction_amount: getPriceInReais(tier, currentExtraAdults),
-        payer: {
-          ...(mpFormData as Record<string, unknown>).payer as object ?? {},
-          email: formData.email,
-        },
       };
 
       const res = await fetch('/api/checkout', {
@@ -631,7 +676,11 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
           <div className="animate-fade-in">
             {paymentResult ? (
               paymentResult.pixQrCode ? (
-                <PixResult pixQrCode={paymentResult.pixQrCode} pixQrCodeBase64={paymentResult.pixQrCodeBase64} />
+                <PixResult
+                  pixQrCode={paymentResult.pixQrCode}
+                  pixQrCodeBase64={paymentResult.pixQrCodeBase64}
+                  registrationId={paymentResult.registrationId}
+                />
               ) : (
                 <BoletoResult boletoUrl={paymentResult.boletoUrl} barcode={paymentResult.barcode} />
               )
@@ -664,19 +713,9 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
                   </div>
                 </div>
 
-                {loading && (
-                  <div className="flex items-center justify-center gap-2 py-4 text-sm font-body" style={{ color: '#9ca3af' }}>
-                    <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                    </svg>
-                    Processando...
-                  </div>
-                )}
-
-                <PaymentBrick
-                  amount={getPriceInReais(tier, extraAdults)}
-                  payerEmail={formData.email}
-                  onPaymentSubmit={handlePaymentSubmit}
+                <PagSeguroCheckout
+                  onSubmit={handlePaymentSubmit}
+                  loading={loading}
                 />
 
                 <button
@@ -691,15 +730,6 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
           </div>
         )}
 
-        {step === 3 && !paymentResult && (
-          <div className="mt-4 flex items-center justify-center gap-2 text-xs font-body" style={{ color: '#9ca3af' }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-            Pagamento 100% seguro via Mercado Pago
-          </div>
-        )}
       </div>
     </div>
   );

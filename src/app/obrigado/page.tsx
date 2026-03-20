@@ -76,9 +76,9 @@ export default function ObrigadoPage() {
 
           <div className="space-y-3">
             {[
-              { icon: '📅', label: 'Data', value: '5 de Abril de 2026, Sábado' },
-              { icon: '☕', label: 'Início', value: '7h30 — Café da Manhã' },
-              { icon: '🌙', label: 'Encerramento', value: '~19h30 após o Jantar' },
+              { icon: '📅', label: 'Data', value: '5 de Abril de 2026 — Domingo' },
+              { icon: '☀️', label: 'Início', value: '06:00 — Consagração' },
+              { icon: '🌙', label: 'Encerramento', value: '21:00 — Encerramento' },
               { icon: '🍽️', label: 'Refeições', value: 'Todas incluídas' },
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-3">
@@ -94,7 +94,7 @@ export default function ObrigadoPage() {
 
         {/* Share on WhatsApp */}
         <a
-          href="https://wa.me/?text=Acabei%20de%20me%20inscrever%20no%20Retiro%20ADESSÊNCIA%202026!%20🙏%20Dia%205%20de%20Abril%2C%20um%20dia%20inteiro%20de%20adoração%20e%20comunhão."
+          href="https://wa.me/?text=Acabei%20de%20me%20inscrever%20no%20Domingo%20Essencial%20ADESSÊNCIA%202026!%20🙏%20Dia%205%20de%20Abril%2C%20um%20dia%20inteiro%20de%20adoração%20e%20comunhão."
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2.5 rounded-full px-6 py-3 text-sm font-semibold font-body text-white transition-all duration-200 hover:scale-105 mb-4"

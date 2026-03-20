@@ -1,33 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServerSupabase } from '@/lib/supabase/server';
-import { getMPPayment } from '@/lib/mercadopago/client';
-import { calculateTotalCents, getPriceInReais, TICKET_TIERS } from '@/lib/utils/pricing';
+import { createOrder } from '@/lib/pagseguro/client';
+import { calculateTotalCents, TICKET_TIERS } from '@/lib/utils/pricing';
 import { TicketType } from '@/types/registration';
 
 const checkoutSchema = z.object({
-  // Registration fields
+  // Dados do inscrito
   name: z.string().min(2),
   email: z.string().email(),
   phone: z.string().min(10),
+  cpf: z.string().min(11).max(14),
   ticket_type: z.enum(['individual', 'casal', 'familia']),
-  participant_names: z.array(z.string().min(1)).min(1).max(20), // até 20 adultos
+  participant_names: z.array(z.string().min(1)).min(1).max(20),
   children_count: z.number().int().min(0).max(30).default(0),
 
-  // MP Payment Brick fields
-  payment_method_id: z.string(),
-  transaction_amount: z.number().positive(),
-  token: z.string().optional(),
-  installments: z.number().optional(),
-  issuer_id: z.string().optional(),
-  payer: z.object({
-    email: z.string().email(),
-    first_name: z.string().optional(),
-    last_name: z.string().optional(),
-    identification: z
-      .object({ type: z.string(), number: z.string() })
-      .optional(),
-  }),
+  // Dados do pagamento
+  payment_method: z.enum(['PIX', 'BOLETO', 'CREDIT_CARD']),
+  // Somente para cartão de crédito
+  encrypted_card: z.string().optional(),
+  card_holder: z.string().optional(),
+  card_security_code: z.string().optional(),
+  installments: z.number().int().min(1).max(12).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -37,18 +31,27 @@ export async function POST(request: NextRequest) {
 
     const ticketType = data.ticket_type as TicketType;
 
-    // Calcula adultos extras (acima de 4 para familia)
     const baseMax = TICKET_TIERS[ticketType].maxParticipants;
-    const extraAdults = ticketType === 'familia'
-      ? Math.max(0, data.participant_names.length - baseMax)
-      : 0;
+    const extraAdults =
+      ticketType === 'familia'
+        ? Math.max(0, data.participant_names.length - baseMax)
+        : 0;
 
     const amountCents = calculateTotalCents(ticketType, extraAdults);
-    const amountReais = getPriceInReais(ticketType, extraAdults);
+
+    // Valida cartão de crédito
+    if (data.payment_method === 'CREDIT_CARD') {
+      if (!data.encrypted_card || !data.card_holder || !data.card_security_code) {
+        return NextResponse.json(
+          { error: 'Dados do cartão incompletos.' },
+          { status: 400 }
+        );
+      }
+    }
 
     const supabase = createServerSupabase();
 
-    // Insert pending registration
+    // Registra como pendente no banco
     const { data: registration, error: dbError } = await supabase
       .from('registrations')
       .insert({
@@ -71,76 +74,83 @@ export async function POST(request: NextRequest) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? '';
     const isPublicUrl = appUrl.startsWith('https://');
-    const mpPayment = getMPPayment();
 
-    // Create payment in Mercado Pago
-    const paymentBody: Record<string, unknown> = {
-      transaction_amount: amountReais,
-      payment_method_id: data.payment_method_id,
-      description: 'Retiro ADESSÊNCIA — 05/04/2026',
-      external_reference: registration.id,
-      // notification_url só é enviado em produção (MP rejeita URLs localhost)
-      ...(isPublicUrl && { notification_url: `${appUrl}/api/webhooks/mercadopago` }),
-      statement_descriptor: 'ADESSENCIA',
-      binary_mode: false,
-      payer: {
-        email: data.payer.email,
-        first_name: data.payer.first_name,
-        last_name: data.payer.last_name,
-        identification: data.payer.identification,
+    // Cria a ordem no PagSeguro
+    const psResponse = await createOrder({
+      referenceId: registration.id,
+      customer: {
+        name: data.name,
+        email: data.email,
+        tax_id: data.cpf,
+        phone: data.phone,
       },
-    };
+      amountCents,
+      paymentMethod: data.payment_method,
+      encryptedCard: data.encrypted_card,
+      cardHolder: data.card_holder,
+      cardSecurityCode: data.card_security_code,
+      installments: data.installments,
+      notificationUrl: isPublicUrl
+        ? `${appUrl}/api/webhooks/pagseguro`
+        : undefined,
+    });
 
-    if (data.token) {
-      paymentBody.token = data.token;
-      paymentBody.installments = data.installments ?? 1;
-      if (data.issuer_id) paymentBody.issuer_id = data.issuer_id;
-    }
+    // Extrai o charge da resposta
+    const charge = (psResponse as {
+      charges?: {
+        id: string;
+        status: string;
+        qr_codes?: { text?: string; links?: { rel: string; href: string }[] }[];
+        payment_method?: {
+          boleto?: {
+            barcode?: string;
+            formatted_barcode?: string;
+          };
+        };
+        links?: { rel: string; href: string }[];
+      }[];
+    }).charges?.[0];
 
-    // Boleto: vence 2 dias antes do evento
-    if (data.payment_method_id === 'bolbradesco' || data.payment_method_id === 'pec') {
-      paymentBody.date_of_expiration = '2026-04-03T23:59:59.000-03:00';
-    }
+    const chargeId = charge?.id ?? '';
+    const chargeStatus = charge?.status ?? 'WAITING';
 
-    const mpResponse = await mpPayment.create({ body: paymentBody });
-
-    // Update registration with MP data
+    // Atualiza registro com dados do PagSeguro
     await supabase
       .from('registrations')
       .update({
-        mp_payment_id: String(mpResponse.id),
-        mp_payment_method: data.payment_method_id === 'pix'
-          ? 'pix'
-          : data.token
-          ? 'credit_card'
-          : 'boleto',
-        mp_status: mpResponse.status,
-        mp_status_detail: mpResponse.status_detail,
+        mp_payment_id: chargeId, // Reutilizando coluna existente para o charge ID
+        mp_payment_method: data.payment_method.toLowerCase(),
+        mp_status: chargeStatus,
       })
       .eq('id', registration.id);
 
-    // Build response
+    // Monta resposta por método de pagamento
     const responseData: Record<string, unknown> = {
       success: true,
-      paymentId: String(mpResponse.id),
-      status: mpResponse.status,
-      statusDetail: mpResponse.status_detail,
+      registrationId: registration.id,
+      paymentId: chargeId,
+      status: chargeStatus,
     };
 
-    if (data.payment_method_id === 'pix') {
-      const txData = (mpResponse as unknown as {
-        point_of_interaction?: { transaction_data?: { qr_code?: string; qr_code_base64?: string } };
-      }).point_of_interaction?.transaction_data;
-      responseData.pixQrCode = txData?.qr_code;
-      responseData.pixQrCodeBase64 = txData?.qr_code_base64;
-    } else if (data.payment_method_id === 'bolbradesco' || data.payment_method_id === 'pec') {
-      const mpRaw = mpResponse as unknown as {
-        transaction_details?: { external_resource_url?: string; barcode?: { content?: string } };
-      };
-      responseData.boletoUrl = mpRaw.transaction_details?.external_resource_url;
-      responseData.barcode = mpRaw.transaction_details?.barcode?.content;
-    } else if (mpResponse.status === 'approved') {
-      responseData.redirectTo = '/obrigado';
+    if (data.payment_method === 'PIX') {
+      const qrCode = charge?.qr_codes?.[0];
+      responseData.pixQrCode = qrCode?.text;
+      const pngLink = qrCode?.links?.find((l) => l.rel === 'QRCODE.PNG');
+      if (pngLink) responseData.pixQrCodeImageUrl = pngLink.href;
+    } else if (data.payment_method === 'BOLETO') {
+      const boletoLinks = charge?.links ?? [];
+      const pdfLink = boletoLinks.find((l) => l.rel === 'BOLETO.PDF');
+      responseData.boletoUrl = pdfLink?.href;
+      responseData.barcode = charge?.payment_method?.boleto?.barcode;
+    } else if (data.payment_method === 'CREDIT_CARD') {
+      if (chargeStatus === 'PAID' || chargeStatus === 'AUTHORIZED') {
+        responseData.redirectTo = '/obrigado';
+      } else {
+        return NextResponse.json(
+          { error: 'Pagamento não aprovado. Verifique os dados do cartão.' },
+          { status: 402 }
+        );
+      }
     }
 
     return NextResponse.json(responseData);
@@ -151,15 +161,17 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
     console.error('Checkout error:', err);
-    // Repassa mensagem do Mercado Pago quando disponível
-    const mpErr = err as { message?: string; error?: string; status?: number };
-    if (mpErr?.status && mpErr.status >= 400 && mpErr.status < 500) {
+
+    const psErr = err as { message?: string; status?: number };
+    if (psErr?.status && psErr.status >= 400 && psErr.status < 500) {
       return NextResponse.json(
-        { error: mpErr.message ?? 'Erro no processamento do pagamento.' },
-        { status: mpErr.status }
+        { error: psErr.message ?? 'Erro no processamento do pagamento.' },
+        { status: psErr.status }
       );
     }
+
     return NextResponse.json({ error: 'Erro interno do servidor.' }, { status: 500 });
   }
 }

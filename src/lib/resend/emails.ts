@@ -20,7 +20,7 @@ export async function sendConfirmationEmail(registration: Registration): Promise
   await getResend().emails.send({
     from: fromEmail,
     to: registration.email,
-    subject: '✅ Inscrição Confirmada — Retiro ADESSENCIA 2026',
+    subject: '✅ Inscrição Confirmada — Domingo Essencial 2026',
     html: `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -30,7 +30,7 @@ export async function sendConfirmationEmail(registration: Registration): Promise
 
     <div style="background:linear-gradient(135deg,#1e3a5f,#2d6a9f);padding:32px 24px;text-align:center;">
       <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:700;">ADESSÊNCIA</h1>
-      <p style="color:#a8d4f5;margin:8px 0 0;font-size:14px;">Retiro de Adoração e Comunhão</p>
+      <p style="color:#a8d4f5;margin:8px 0 0;font-size:14px;">Domingo Essencial — Adoração &amp; Comunhão</p>
     </div>
 
     <div style="padding:32px 24px;">
@@ -42,7 +42,7 @@ export async function sendConfirmationEmail(registration: Registration): Promise
 
       <p style="color:#333;font-size:15px;">Olá, <strong>${registration.name}</strong>!</p>
       <p style="color:#555;font-size:14px;line-height:1.6;">
-        Ficamos muito felizes em confirmar sua presença no nosso retiro. Prepare seu coração para um dia especial de adoração, comunhão e encontro com Deus!
+        Ficamos muito felizes em confirmar sua presença no Domingo Essencial. Prepare seu coração para um dia especial de adoração, comunhão e encontro com Deus!
       </p>
 
       <div style="background:#f8f9fa;border-radius:8px;padding:20px;margin:20px 0;border-left:4px solid #2d6a9f;">
@@ -74,7 +74,7 @@ export async function sendConfirmationEmail(registration: Registration): Promise
     </div>
 
     <div style="background:#f8f9fa;padding:16px 24px;text-align:center;border-top:1px solid #eee;">
-      <p style="color:#999;font-size:12px;margin:0;">ADESSÊNCIA — Retiro 2026 &bull; ID da Inscrição: ${registration.id.slice(0, 8).toUpperCase()}</p>
+      <p style="color:#999;font-size:12px;margin:0;">ADESSÊNCIA — Domingo Essencial 2026 &bull; ID da Inscrição: ${registration.id.slice(0, 8).toUpperCase()}</p>
     </div>
   </div>
 </body>

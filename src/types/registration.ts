@@ -50,6 +50,7 @@ export interface CheckoutPayload extends RegistrationFormData {
 
 export interface CheckoutResponse {
   success: boolean;
+  registrationId?: string;
   paymentId: string;
   status: string;
   statusDetail: string;

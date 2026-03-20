@@ -36,7 +36,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-24">
 
       {/* ── Slideshow background — CSS background-image approach ─────── */}
       {SLIDES.map((src, i) => (
@@ -77,59 +77,83 @@ export default function HeroSection() {
       {/* ── Main content ─────────────────────────────────────────────── */}
       <div className="relative text-center px-6 max-w-4xl mx-auto w-full" style={{ zIndex: 2 }}>
 
-        {/* Logo + church tag */}
+        {/* Logo */}
         <div
-          className="flex flex-col items-center gap-4 mb-10 animate-fade-in"
+          className="flex flex-col items-center mb-16 animate-fade-in"
           style={{ opacity: 0, animationDelay: '0.1s' }}
         >
-          <div
-            className="rounded-full bg-white flex items-center justify-center"
-            style={{
-              width: 72,
-              height: 72,
-              boxShadow: '0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.15)',
-            }}
-          >
-            <Image
-              src="/IMG_9077.png"
-              alt="Essência da Adoração"
-              width={52}
-              height={52}
-              style={{ objectFit: 'contain' }}
-              priority
-            />
-          </div>
-
-          <div
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full"
-            style={{
-              background: 'rgba(255,255,255,0.1)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              backdropFilter: 'blur(10px)',
-            }}
-          >
-            <span className="text-xs font-body font-medium tracking-[0.15em] uppercase text-white/80">
-              Assembleia de Deus Essência da Adoração
-            </span>
-          </div>
+          <Image
+            src="/IMG_9077.png"
+            alt="Essência da Adoração"
+            width={80}
+            height={80}
+            style={{ objectFit: 'contain', filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.5))' }}
+            priority
+            
+          />
         </div>
 
         {/* H1 — Event title */}
-        <h1
-          className="font-display text-white animate-fade-in-up"
-          style={{
-            fontSize: 'clamp(2.8rem, 8vw, 6rem)',
-            fontWeight: 300,
-            letterSpacing: '0.02em',
-            lineHeight: 1.08,
-            opacity: 0,
-            animationDelay: '0.3s',
-          }}
+        <div
+          className="animate-fade-in-up"
+          style={{ opacity: 0, animationDelay: '0.3s' }}
         >
-          Domingo Essencial
-          <br />
-          <em style={{ fontStyle: 'italic' }}>Adoração &amp; Comunhão</em>
-        </h1>
+          {/* Eyebrow line */}
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-px w-10" style={{ background: 'rgba(201,151,58,0.5)' }} />
+            <span
+              className="font-body text-xs font-semibold tracking-[0.35em] uppercase"
+              style={{ color: '#e0b460' }}
+            >
+              Evento Especial
+            </span>
+            <div className="h-px w-10" style={{ background: 'rgba(201,151,58,0.5)' }} />
+          </div>
+
+          {/* Main title */}
+          <h1
+            className="font-display text-white"
+            style={{
+              fontSize: 'clamp(3rem, 9vw, 6.5rem)',
+              fontWeight: 700,
+              letterSpacing: '-0.02em',
+              lineHeight: 1.0,
+              textShadow: '0 2px 40px rgba(0,0,0,0.4)',
+            }}
+          >
+            Domingo Essencial
+          </h1>
+
+          {/* Gold divider */}
+          <div className="flex items-center justify-center gap-4 my-4">
+            <div
+              className="h-px flex-1 max-w-[80px]"
+              style={{ background: 'linear-gradient(to right, transparent, #c9973a)' }}
+            />
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#c9973a" opacity="0.8">
+              <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
+            </svg>
+            <div
+              className="h-px flex-1 max-w-[80px]"
+              style={{ background: 'linear-gradient(to left, transparent, #c9973a)' }}
+            />
+          </div>
+
+          {/* Subtitle */}
+          <p
+            className="font-display text-white/85"
+            style={{
+              fontSize: 'clamp(1.4rem, 4vw, 2.5rem)',
+              fontWeight: 300,
+              fontStyle: 'italic',
+              letterSpacing: '0.04em',
+              lineHeight: 1.2,
+              textShadow: '0 1px 20px rgba(0,0,0,0.3)',
+            }}
+          >
+            Adoração &amp; Comunhão
+          </p>
+        </div>
 
         {/* Date + Location badges */}
         <div

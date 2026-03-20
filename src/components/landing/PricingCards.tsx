@@ -15,20 +15,20 @@ const TIER_FEATURES = {
     'Todas as refeições incluídas',
     'Crianças até 12 anos grátis',
     'Louvor e atividades do dia',
-    'Acesso completo ao retiro',
+    'Acesso completo ao Domingo Essencial',
   ],
   casal: [
     'Todas as refeições incluídas',
     'Crianças até 12 anos grátis',
     'Louvor e atividades do dia',
-    'Acesso completo ao retiro',
+    'Acesso completo ao Domingo Essencial',
   ],
   familia: [
     'Até 4 adultos incluídos',
     'Crianças até 12 anos grátis',
     '+R$ 50 por adulto extra (5º, 6º...)',
     'Todas as refeições incluídas',
-    'Acesso completo ao retiro',
+    'Acesso completo ao Domingo Essencial',
   ],
 };
 

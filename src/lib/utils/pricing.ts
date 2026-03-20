@@ -1,13 +1,14 @@
 import { TicketType } from '@/types/registration';
 
-export const EXTRA_ADULT_PRICE_CENTS = 5000; // R$50 por adulto extra (acima de 4 no familia)
+// ⚠️ PREÇOS DE TESTE — alterar para produção antes do lançamento
+export const EXTRA_ADULT_PRICE_CENTS = 100; // R$1,00 por adulto extra (TESTE)
 
 export const TICKET_TIERS = {
   individual: {
     label: 'Individual',
     description: '1 adulto',
-    price: 5000, // centavos
-    priceDisplay: 'R$ 50,00',
+    price: 100, // centavos — TESTE (produção: 5000)
+    priceDisplay: 'R$ 1,00',
     maxParticipants: 1,
     highlight: false,
     savings: null,
@@ -15,8 +16,8 @@ export const TICKET_TIERS = {
   casal: {
     label: 'Casal',
     description: '2 adultos',
-    price: 9000,
-    priceDisplay: 'R$ 90,00',
+    price: 100, // TESTE (produção: 9000)
+    priceDisplay: 'R$ 1,00',
     maxParticipants: 2,
     highlight: true,
     savings: 'Economia de R$ 10',
@@ -24,8 +25,8 @@ export const TICKET_TIERS = {
   familia: {
     label: 'Família',
     description: 'Até 4 adultos',
-    price: 16000,
-    priceDisplay: 'R$ 160,00',
+    price: 100, // TESTE (produção: 16000)
+    priceDisplay: 'R$ 1,00',
     maxParticipants: 4,
     highlight: false,
     savings: 'Crianças até 12 anos grátis',
