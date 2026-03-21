@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import Script from 'next/script';
 
 declare global {
@@ -97,7 +97,7 @@ export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
   const [cardHolder, setCardHolder] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvv, setCardCvv] = useState('');
-  const [cardFlipped, setCardFlipped] = useState(false);
+  const [, setCardFlipped] = useState(false);
 
   const cpfDigits = cpf.replace(/\D/g, '');
   const cpfValid = cpfDigits.length === 11;
