@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Script from 'next/script';
 
 declare global {
   interface Window {
@@ -86,10 +85,26 @@ const METHOD_TABS: { id: PaymentMethodType; label: string; icon: React.ReactNode
   },
 ];
 
+/** Aguarda o SDK do PagSeguro estar disponível (até maxMs) */
+function waitForPagSeguro(maxMs = 8000): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (window.PagSeguro) return resolve(true);
+    const start = Date.now();
+    const interval = setInterval(() => {
+      if (window.PagSeguro) {
+        clearInterval(interval);
+        resolve(true);
+      } else if (Date.now() - start > maxMs) {
+        clearInterval(interval);
+        resolve(false);
+      }
+    }, 200);
+  });
+}
+
 export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
   const [method, setMethod] = useState<PaymentMethodType>('PIX');
   const [cpf, setCpf] = useState('');
-  const [sdkReady, setSdkReady] = useState(false);
   const [fieldError, setFieldError] = useState<string | null>(null);
 
   // Credit card state
@@ -97,7 +112,6 @@ export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
   const [cardHolder, setCardHolder] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvv, setCardCvv] = useState('');
-  const [, setCardFlipped] = useState(false);
 
   const cpfDigits = cpf.replace(/\D/g, '');
   const cpfValid = cpfDigits.length === 11;
@@ -111,8 +125,10 @@ export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
     }
 
     if (method === 'CREDIT_CARD') {
-      if (!sdkReady || !window.PagSeguro) {
-        setFieldError('SDK do PagSeguro ainda carregando. Aguarde um momento.');
+      // Aguarda silenciosamente o SDK (já carregado em background desde o layout)
+      const available = await waitForPagSeguro(8000);
+      if (!available || !window.PagSeguro) {
+        setFieldError('Erro de conexão. Verifique sua internet e tente novamente.');
         return;
       }
       if (!cardNumber || !cardHolder || !cardExpiry || !cardCvv) {
@@ -151,15 +167,7 @@ export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
   };
 
   return (
-    <>
-      {/* PagSeguro.js SDK */}
-      <Script
-        src="https://assets.pagseguro.com.br/checkout-sdk/npm/release/123.1.6/browser/pagseguro.min.js"
-        onLoad={() => setSdkReady(true)}
-        onError={() => console.warn('PagSeguro.js falhou ao carregar.')}
-      />
-
-      <div className="space-y-5">
+    <div className="space-y-5">
 
         {/* ── Tabs de método ── */}
         <div
@@ -316,8 +324,6 @@ export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
                   placeholder="•••"
                   maxLength={4}
                   value={cardCvv}
-                  onFocus={() => setCardFlipped(true)}
-                  onBlur={() => setCardFlipped(false)}
                   onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
                 />
               </div>
@@ -370,6 +376,5 @@ export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
         </div>
 
       </div>
-    </>
   );
 }

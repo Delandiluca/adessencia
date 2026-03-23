@@ -95,30 +95,23 @@ export async function POST(request: NextRequest) {
         : undefined,
     });
 
-    // Extrai o charge da resposta
-    const charge = (psResponse as {
-      charges?: {
-        id: string;
-        status: string;
-        qr_codes?: { text?: string; links?: { rel: string; href: string }[] }[];
-        payment_method?: {
-          boleto?: {
-            barcode?: string;
-            formatted_barcode?: string;
-          };
-        };
-        links?: { rel: string; href: string }[];
-      }[];
-    }).charges?.[0];
+    // PIX usa qr_codes no nível do pedido; BOLETO/CARTÃO usam charges
+    const qrCode = psResponse.qr_codes?.[0];
+    const charge = psResponse.charges?.[0] as ({
+      id: string;
+      status: string;
+      payment_method?: { boleto?: { barcode?: string; formatted_barcode?: string } };
+      links?: { rel: string; href: string; media?: string }[];
+    } | undefined);
 
-    const chargeId = charge?.id ?? '';
-    const chargeStatus = charge?.status ?? 'WAITING';
+    const paymentId = qrCode?.id ?? charge?.id ?? '';
+    const chargeStatus = charge?.status ?? (qrCode ? 'WAITING' : 'WAITING');
 
     // Atualiza registro com dados do PagSeguro
     await supabase
       .from('registrations')
       .update({
-        mp_payment_id: chargeId, // Reutilizando coluna existente para o charge ID
+        mp_payment_id: paymentId,
         mp_payment_method: data.payment_method.toLowerCase(),
         mp_status: chargeStatus,
       })
@@ -128,26 +121,46 @@ export async function POST(request: NextRequest) {
     const responseData: Record<string, unknown> = {
       success: true,
       registrationId: registration.id,
-      paymentId: chargeId,
+      paymentId,
       status: chargeStatus,
     };
 
     if (data.payment_method === 'PIX') {
-      const qrCode = charge?.qr_codes?.[0];
       responseData.pixQrCode = qrCode?.text;
+      // Busca o PNG do QR code diretamente no PagBank com autenticação Bearer
+      // O PNG vem do servidor do PagBank — não é gerado no frontend
       const pngLink = qrCode?.links?.find((l) => l.rel === 'QRCODE.PNG');
-      if (pngLink) responseData.pixQrCodeImageUrl = pngLink.href;
+      if (pngLink) {
+        try {
+          const token = process.env.PAGSEGURO_TOKEN ?? '';
+          const imgRes = await fetch(pngLink.href, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (imgRes.ok) {
+            const buffer = await imgRes.arrayBuffer();
+            const base64 = Buffer.from(buffer).toString('base64');
+            responseData.pixQrCodeBase64 = base64;
+          }
+        } catch {
+          // fallback: frontend usa react-qr-code com o texto
+        }
+      }
     } else if (data.payment_method === 'BOLETO') {
       const boletoLinks = charge?.links ?? [];
-      const pdfLink = boletoLinks.find((l) => l.rel === 'BOLETO.PDF');
+      // PagBank retorna rel:"SELF" com media:"application/pdf" para o boleto
+      const pdfLink = boletoLinks.find(
+        (l) => l.media === 'application/pdf' || l.rel === 'BOLETO.PDF'
+      );
       responseData.boletoUrl = pdfLink?.href;
-      responseData.barcode = charge?.payment_method?.boleto?.barcode;
+      responseData.barcode =
+        charge?.payment_method?.boleto?.formatted_barcode ??
+        charge?.payment_method?.boleto?.barcode;
     } else if (data.payment_method === 'CREDIT_CARD') {
       if (chargeStatus === 'PAID' || chargeStatus === 'AUTHORIZED') {
         responseData.redirectTo = '/obrigado';
       } else {
         return NextResponse.json(
-          { error: 'Pagamento não aprovado. Verifique os dados do cartão.' },
+          { error: 'Pagamento não aprovado. Verifique os dados do cartão e tente novamente.' },
           { status: 402 }
         );
       }

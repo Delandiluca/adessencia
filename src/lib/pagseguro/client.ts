@@ -3,25 +3,58 @@ const BASE_URL =
     ? 'https://sandbox.api.pagseguro.com'
     : 'https://api.pagseguro.com';
 
-async function psRequest(path: string, body: unknown) {
+// Traduz mensagens técnicas do PagBank para português amigável
+function friendlyError(rawMsg: string, code?: string): string {
+  const m = rawMsg.toLowerCase();
+
+  if (m.includes('buyer email must not be equals to merchant'))
+    return 'O e-mail informado não pode ser o mesmo da conta do estabelecimento. Utilize outro e-mail.';
+  if (m.includes('invalid credential') || m.includes('unauthorized'))
+    return 'Erro de autenticação com o sistema de pagamento. Tente novamente.';
+  if (m.includes('whitelist'))
+    return 'Serviço de pagamento temporariamente indisponível. Tente novamente em instantes.';
+  if (m.includes('invalid card') || m.includes('card number'))
+    return 'Número do cartão inválido. Verifique e tente novamente.';
+  if (m.includes('card expired') || m.includes('expiry'))
+    return 'Cartão vencido. Utilize outro cartão.';
+  if (m.includes('insufficient funds') || m.includes('declined'))
+    return 'Pagamento recusado. Verifique o limite ou utilize outro cartão.';
+  if (m.includes('invalid cvv') || m.includes('security_code'))
+    return 'CVV inválido. Verifique o código de segurança do cartão.';
+  if (m.includes('tax_id') || m.includes('cpf'))
+    return 'CPF inválido. Verifique e tente novamente.';
+  if (m.includes('unknown or unexpected'))
+    return 'Erro interno ao gerar cobrança. Tente novamente.';
+
+  if (code === '40001') return 'Dados de pagamento incompletos. Tente novamente.';
+  if (code === '40002') return 'Valor ou parâmetro inválido.';
+  if (code === '40003') return 'Parâmetro desconhecido. Tente novamente.';
+
+  return rawMsg || 'Erro ao processar pagamento. Tente novamente.';
+}
+
+async function psRequest(path: string, body: unknown, method: 'POST' | 'GET' = 'POST') {
   const token = process.env.PAGSEGURO_TOKEN;
   if (!token) throw new Error('PAGSEGURO_TOKEN não configurado.');
 
+  console.log('[PagBank] →', method, BASE_URL + path, JSON.stringify(body));
+
   const res = await fetch(`${BASE_URL}${path}`, {
-    method: 'POST',
+    method,
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(body),
+    ...(method === 'POST' ? { body: JSON.stringify(body) } : {}),
   });
 
   const json = await res.json().catch(() => ({}));
+  console.log('[PagBank] ←', res.status, JSON.stringify(json));
 
   if (!res.ok) {
-    const msg =
-      (json as { error_messages?: { description?: string }[] })
-        ?.error_messages?.[0]?.description ?? 'Erro no PagSeguro.';
+    const errBody = json as { error_messages?: { description?: string; code?: string }[] };
+    const first = errBody?.error_messages?.[0];
+    const msg = friendlyError(first?.description ?? '', first?.code);
     throw Object.assign(new Error(msg), { status: res.status, body: json });
   }
 
@@ -31,8 +64,8 @@ async function psRequest(path: string, body: unknown) {
 export interface PagSeguroCustomer {
   name: string;
   email: string;
-  tax_id: string; // CPF — somente dígitos
-  phone: string;  // formato BR: (11) 99999-9999
+  tax_id: string;
+  phone: string;
 }
 
 export interface CreateOrderParams {
@@ -40,97 +73,141 @@ export interface CreateOrderParams {
   customer: PagSeguroCustomer;
   amountCents: number;
   paymentMethod: 'PIX' | 'BOLETO' | 'CREDIT_CARD';
-  // Credit card only
   encryptedCard?: string;
   cardHolder?: string;
   cardSecurityCode?: string;
   installments?: number;
-  // Webhook
   notificationUrl?: string;
+}
+
+export interface PagSeguroOrderResponse {
+  id: string;
+  reference_id: string;
+  // PIX: QR codes no nível do pedido
+  qr_codes?: {
+    id: string;
+    text: string;
+    expiration_date: string;
+    amount: { value: number };
+    links: { rel: string; href: string; media: string; type: string }[];
+  }[];
+  // BOLETO/CARTÃO: cobranças
+  charges?: {
+    id: string;
+    status: string;
+    reference_id?: string;
+    payment_method?: {
+      boleto?: { barcode?: string; formatted_barcode?: string };
+    };
+    links?: { rel: string; href: string }[];
+  }[];
+  links?: { rel: string; href: string }[];
 }
 
 function parsePhone(raw: string) {
   const digits = raw.replace(/\D/g, '');
-  const area = digits.slice(0, 2);
-  const number = digits.slice(2);
-  return { country: '55', area, number, type: 'MOBILE' as const };
+  return { country: '55', area: digits.slice(0, 2), number: digits.slice(2), type: 'MOBILE' as const };
 }
 
-export async function createOrder(params: CreateOrderParams) {
+// Expiração do PIX: 05/04/2026 às 23:59 (dia do evento)
+function pixExpirationDate(): string {
+  return '2026-04-05T23:59:59-03:00';
+}
+
+export async function createOrder(params: CreateOrderParams): Promise<PagSeguroOrderResponse> {
   const cpf = params.customer.tax_id.replace(/\D/g, '');
+  const notificationUrls = params.notificationUrl ? [params.notificationUrl] : [];
 
-  const chargeNotification = params.notificationUrl
-    ? { notification_urls: [params.notificationUrl] }
-    : {};
+  const customer = {
+    name: params.customer.name,
+    email: params.customer.email,
+    tax_id: cpf,
+    phones: [parsePhone(params.customer.phone)],
+  };
 
-  let paymentMethodBody: Record<string, unknown>;
+  const items = [{
+    reference_id: 'ticket-001',
+    name: 'Ingresso Domingo Essencial — ADESSÊNCIA',
+    quantity: 1,
+    unit_amount: params.amountCents,
+  }];
 
+  // ── PIX: usa qr_codes no nível do pedido ──────────────────────────────────
   if (params.paymentMethod === 'PIX') {
-    paymentMethodBody = { type: 'PIX', pix: { expires_in: 3600 } };
-  } else if (params.paymentMethod === 'BOLETO') {
-    paymentMethodBody = {
-      type: 'BOLETO',
-      boleto: {
-        due_date: '2026-04-03',
-        instruction_lines: {
-          line_1: 'Ingresso Domingo Essencial — ADESSÊNCIA',
-          line_2: 'Vencimento: 03/04/2026',
-        },
-        holder: {
-          name: params.customer.name,
-          tax_id: cpf,
-          email: params.customer.email,
-          address: {
-            street: 'Rua Samuel Levi',
-            number: '145',
-            locality: 'Centro',
-            city: 'Cachoeiro de Itapemirim',
-            region_code: 'ES',
-            country: 'Brasil',
-            postal_code: '29300000',
-          },
-        },
-      },
-    };
-  } else {
-    paymentMethodBody = {
-      type: 'CREDIT_CARD',
-      installments: params.installments ?? 1,
-      capture: true,
-      soft_descriptor: 'ADESSENCIA',
-      card: {
-        encrypted: params.encryptedCard,
-        security_code: params.cardSecurityCode,
-        holder: { name: params.cardHolder },
-        store: false,
-      },
-    };
+    return psRequest('/orders', {
+      reference_id: params.referenceId,
+      customer,
+      items,
+      qr_codes: [{
+        amount: { value: params.amountCents },
+        expiration_date: pixExpirationDate(),
+      }],
+      notification_urls: notificationUrls,
+    }) as Promise<PagSeguroOrderResponse>;
   }
 
-  return psRequest('/orders', {
-    reference_id: params.referenceId,
-    customer: {
-      name: params.customer.name,
-      email: params.customer.email,
-      tax_id: cpf,
-      phones: [parsePhone(params.customer.phone)],
-    },
-    items: [
-      {
-        reference_id: 'ticket-001',
-        name: 'Ingresso Domingo Essencial — ADESSÊNCIA',
-        quantity: 1,
-        unit_amount: params.amountCents,
-      },
-    ],
-    charges: [
-      {
+  // ── BOLETO: usa charges ───────────────────────────────────────────────────
+  if (params.paymentMethod === 'BOLETO') {
+    return psRequest('/orders', {
+      reference_id: params.referenceId,
+      customer,
+      items,
+      charges: [{
         reference_id: `charge-${params.referenceId}`,
         description: 'Domingo Essencial ADESSÊNCIA — 05/04/2026',
         amount: { value: params.amountCents, currency: 'BRL' },
-        payment_method: paymentMethodBody,
-        ...chargeNotification,
+        payment_method: {
+          type: 'BOLETO',
+          boleto: {
+            due_date: '2026-04-03',
+            instruction_lines: {
+              line_1: 'Ingresso Domingo Essencial — ADESSÊNCIA',
+              line_2: 'Vencimento: 03/04/2026',
+            },
+            holder: {
+              name: params.customer.name,
+              tax_id: cpf,
+              email: params.customer.email,
+              address: {
+                street: 'Rua Samuel Levi',
+                number: '145',
+                locality: 'Centro',
+                city: 'Cachoeiro de Itapemirim',
+                region: 'Espirito Santo',
+                region_code: 'ES',
+                country: 'BRA',
+                postal_code: '29300000',
+              },
+            },
+          },
+        },
+        notification_urls: notificationUrls,
+      }],
+    }) as Promise<PagSeguroOrderResponse>;
+  }
+
+  // ── CARTÃO: usa charges ───────────────────────────────────────────────────
+  return psRequest('/orders', {
+    reference_id: params.referenceId,
+    customer,
+    items,
+    charges: [{
+      reference_id: `charge-${params.referenceId}`,
+      description: 'Domingo Essencial ADESSÊNCIA — 05/04/2026',
+      amount: { value: params.amountCents, currency: 'BRL' },
+      payment_method: {
+        type: 'CREDIT_CARD',
+        installments: params.installments ?? 1,
+        capture: true,
+        soft_descriptor: 'ADESSENCIA',
+        card: {
+          encrypted: params.encryptedCard,
+          security_code: params.cardSecurityCode,
+          holder: { name: params.cardHolder },
+          store: false,
+        },
       },
-    ],
-  });
+      notification_urls: notificationUrls,
+    }],
+  }) as Promise<PagSeguroOrderResponse>;
 }

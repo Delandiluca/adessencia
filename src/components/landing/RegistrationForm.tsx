@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import QRCode from 'react-qr-code';
 import { TicketType } from '@/types/registration';
 import { TICKET_TIERS, calculateTotalCents, getPriceInReais, formatReais, EXTRA_ADULT_PRICE_CENTS } from '@/lib/utils/pricing';
 import { CheckoutResponse } from '@/types/registration';
@@ -211,16 +212,21 @@ function PixResult({
       >
         ⏱ {mm}:{ss}
       </div>
-      {pixQrCodeBase64 && (
-        <div className="flex justify-center mb-4">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+      <div className="flex justify-center mb-4 p-4 bg-white rounded-xl border border-gray-200 w-fit mx-auto">
+        {pixQrCodeBase64 ? (
+          /* Imagem oficial gerada pelo PagBank — buscada server-side com autenticação */
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={`data:image/png;base64,${pixQrCodeBase64}`}
             alt="QR Code PIX"
-            className="w-48 h-48 rounded-xl border border-gray-200"
+            width={176}
+            height={176}
           />
-        </div>
-      )}
+        ) : (
+          /* Fallback local — mesmo payload, mesmo CRC32, mesmo destino */
+          <QRCode value={pixQrCode} size={176} />
+        )}
+      </div>
       <button
         onClick={copy}
         className="w-full rounded-xl py-3 text-sm font-semibold font-body transition-all duration-200 flex items-center justify-center gap-2 mb-3"
