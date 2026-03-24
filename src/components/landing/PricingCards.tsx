@@ -60,7 +60,8 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
         const tier = TICKET_TIERS[key];
         const isSelected = selectedTier === key;
         const isHighlighted = tier.highlight;
-        const isDark = isSelected || isHighlighted;
+        // Popular sempre fica escuro; selecionado usa linguagem visual própria (borda dourada)
+        const isDark = isHighlighted;
 
         return (
           <div
@@ -69,14 +70,16 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
             style={{
               background: isDark
                 ? 'linear-gradient(160deg, #1e3a5f 0%, #0f1f35 100%)'
+                : isSelected
+                ? '#fffcf5'
                 : '#ffffff',
               border: isSelected
-                ? '1px solid rgba(201,151,58,0.6)'
+                ? '2px solid #c9973a'
                 : isHighlighted
                 ? '1px solid rgba(30,58,95,0.4)'
                 : '1px solid #e5e7eb',
               boxShadow: isSelected
-                ? '0 0 0 2px rgba(201,151,58,0.25), 0 20px 48px rgba(30,58,95,0.2)'
+                ? '0 0 0 3px rgba(201,151,58,0.15), 0 12px 32px rgba(201,151,58,0.12)'
                 : isHighlighted
                 ? '0 20px 48px rgba(30,58,95,0.18)'
                 : '0 2px 12px rgba(30,58,95,0.06)',
@@ -84,24 +87,24 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
             }}
             onClick={() => onSelect(key)}
           >
-            {/* Popular badge */}
-            {isHighlighted && !isSelected && (
+            {/* Popular badge — sempre visível no Casal */}
+            {isHighlighted && (
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
                 <span
                   className="inline-block px-4 py-1 rounded-full text-xs font-semibold font-body tracking-wide text-white"
                   style={{ background: 'linear-gradient(90deg, #c9973a, #e0b460)' }}
                 >
-                  ⭐ Mais popular
+                  {isSelected ? '✓ Selecionado' : '⭐ Mais popular'}
                 </span>
               </div>
             )}
 
-            {/* Selected badge */}
-            {isSelected && (
+            {/* Selected badge — apenas para não-popular */}
+            {isSelected && !isHighlighted && (
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
                 <span
-                  className="inline-block px-4 py-1 rounded-full text-xs font-semibold font-body tracking-wide text-white"
-                  style={{ background: 'linear-gradient(90deg, #c9973a, #e0b460)' }}
+                  className="inline-block px-4 py-1 rounded-full text-xs font-semibold font-body tracking-wide"
+                  style={{ background: '#fffcf5', color: '#c9973a', border: '1.5px solid #c9973a' }}
                 >
                   ✓ Selecionado
                 </span>
@@ -191,11 +194,11 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
                 onClick={(e) => { e.stopPropagation(); onSelect(key); }}
                 className="w-full rounded-xl py-3 text-sm font-semibold font-body transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 style={
-                  isDark
+                  isDark || isSelected
                     ? {
                         background: 'linear-gradient(135deg, #c9973a, #e0b460)',
                         color: 'white',
-                        boxShadow: '0 4px 20px rgba(201,151,58,0.4)',
+                        boxShadow: '0 4px 20px rgba(201,151,58,0.35)',
                       }
                     : {
                         background: '#f8f7f5',

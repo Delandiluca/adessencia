@@ -29,18 +29,19 @@ interface FormData {
 // ─── Step Indicator ─────────────────────────────────────────────────────────
 function StepIndicator({ current }: { current: Step }) {
   const steps = [
-    { num: 1, label: 'Dados', labelFull: 'Dados Pessoais' },
-    { num: 2, label: 'Participantes', labelFull: 'Participantes' },
-    { num: 3, label: 'Pagamento', labelFull: 'Pagamento' },
+    { num: 1, label: 'Dados' },
+    { num: 2, label: 'Pessoas' },
+    { num: 3, label: 'Pagamento' },
   ];
 
   return (
-    <div className="flex items-center justify-center mb-8 w-full px-2">
+    <div className="flex items-center w-full mb-8 px-2">
       {steps.map((s, i) => (
-        <div key={s.num} className="flex items-center">
-          <div className="flex flex-col items-center" style={{ minWidth: 48 }}>
+        <div key={s.num} className="flex items-center flex-1">
+          {/* Bullet + label */}
+          <div className="flex flex-col items-center flex-shrink-0" style={{ width: 52 }}>
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold font-body transition-all duration-300 flex-shrink-0"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold font-body transition-all duration-300"
               style={
                 current === s.num
                   ? { background: '#c9973a', color: 'white', boxShadow: '0 0 0 4px rgba(201,151,58,0.2)' }
@@ -56,20 +57,20 @@ function StepIndicator({ current }: { current: Step }) {
               ) : s.num}
             </div>
             <span
-              className="text-[9px] font-body mt-1 text-center leading-tight"
+              className="text-[10px] font-body mt-1 text-center leading-tight w-full"
               style={{
                 color: current === s.num ? '#c9973a' : '#9ca3af',
                 fontWeight: current === s.num ? 600 : 400,
-                maxWidth: 56,
               }}
             >
-              {s.labelFull}
+              {s.label}
             </span>
           </div>
+          {/* Connector */}
           {i < steps.length - 1 && (
             <div
-              className="h-[1px] mb-5 mx-1 flex-1 transition-all duration-500"
-              style={{ background: current > s.num ? '#c9973a' : '#e5e7eb', minWidth: 16, maxWidth: 48 }}
+              className="h-[1px] flex-1 mb-5 mx-1 transition-all duration-500"
+              style={{ background: current > s.num ? '#c9973a' : '#e5e7eb' }}
             />
           )}
         </div>

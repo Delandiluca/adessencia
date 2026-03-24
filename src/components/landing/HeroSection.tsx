@@ -246,18 +246,6 @@ export default function HeroSection() {
           ))}
         </div>
 
-        {/* Scroll indicator */}
-        <div
-          className="mt-10 animate-fade-in"
-          style={{ opacity: 0, animationDelay: '1.3s' }}
-        >
-          <div className="w-5 h-8 rounded-full border border-white/20 mx-auto flex items-start justify-center pt-1.5">
-            <div
-              className="w-1 h-2 rounded-full bg-white/40"
-              style={{ animation: 'scrollBob 1.8s ease-in-out infinite' }}
-            />
-          </div>
-        </div>
       </div>
 
       {/* Bottom blend into white page */}
