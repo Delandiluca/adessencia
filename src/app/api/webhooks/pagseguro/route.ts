@@ -76,8 +76,8 @@ export async function POST(request: NextRequest) {
       .from('registrations')
       .update({
         status: internalStatus,
-        mp_payment_id: chargeId,
-        mp_status: chargeStatus,
+        gateway_payment_id: chargeId,
+        gateway_status: chargeStatus,
       })
       .eq('id', registrationId);
 

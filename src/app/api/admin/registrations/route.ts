@@ -25,7 +25,12 @@ export async function GET(request: NextRequest) {
     .range(offset, offset + limit - 1);
 
   if (status && status !== 'all') {
-    query = query.eq('status', status);
+    // 'failed' agrupa todos os estados problemáticos (rejected, failed, cancelled)
+    if (status === 'failed') {
+      query = query.in('status', ['rejected', 'failed', 'cancelled']);
+    } else {
+      query = query.eq('status', status);
+    }
   }
 
   const { data, error, count } = await query;

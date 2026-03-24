@@ -23,7 +23,7 @@ export function registrationsToCSV(registrations: Registration[]): string {
     r.ticket_type,
     (r.amount_cents / 100).toFixed(2),
     r.status,
-    r.mp_payment_method ?? '',
+    r.gateway_method ?? '',
     r.participant_names.join(' | '),
     formatDate(r.created_at),
     r.confirmed_at ? formatDate(r.confirmed_at) : '',

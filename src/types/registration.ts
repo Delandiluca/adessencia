@@ -1,5 +1,5 @@
 export type TicketType = 'individual' | 'casal' | 'familia';
-export type PaymentStatus = 'pending' | 'confirmed' | 'failed' | 'cancelled';
+export type PaymentStatus = 'pending' | 'confirmed' | 'rejected' | 'cancelled' | 'failed';
 export type PaymentMethod = 'pix' | 'credit_card' | 'boleto';
 
 export interface Registration {
@@ -12,10 +12,10 @@ export interface Registration {
   participant_names: string[];
   children_count: number;       // crianças até 12 anos (grátis, não cobradas)
   status: PaymentStatus;
-  mp_payment_id: string | null;
-  mp_payment_method: PaymentMethod | null;
-  mp_status: string | null;
-  mp_status_detail: string | null;
+  gateway_payment_id: string | null;
+  gateway_method: PaymentMethod | null;
+  gateway_status: string | null;
+  gateway_status_detail: string | null;
   created_at: string;
   confirmed_at: string | null;
   updated_at: string;
@@ -30,22 +30,14 @@ export interface RegistrationFormData {
   children_count: number;        // crianças até 12 anos (grátis)
 }
 
+// Payload enviado ao /api/checkout (PagBank)
 export interface CheckoutPayload extends RegistrationFormData {
-  // Mercado Pago Payment Brick formData (forwarded as-is)
-  payment_method_id: string;
-  transaction_amount: number;
-  token?: string;
+  payment_method: 'PIX' | 'CREDIT_CARD';
+  cpf: string;
+  encrypted_card?: string;
+  card_holder?: string;
+  card_security_code?: string;
   installments?: number;
-  issuer_id?: string;
-  payer: {
-    email: string;
-    first_name?: string;
-    last_name?: string;
-    identification?: {
-      type: string;
-      number: string;
-    };
-  };
 }
 
 export interface CheckoutResponse {
@@ -57,9 +49,6 @@ export interface CheckoutResponse {
   // PIX
   pixQrCode?: string;
   pixQrCodeBase64?: string;
-  // Boleto
-  boletoUrl?: string;
-  barcode?: string;
   // Credit card redirect
   redirectTo?: string;
   error?: string;

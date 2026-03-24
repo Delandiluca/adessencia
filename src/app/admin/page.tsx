@@ -7,10 +7,11 @@ import { Registration, AdminStats, PaymentStatus } from '@/types/registration';
 import { TICKET_TIERS } from '@/lib/utils/pricing';
 
 const STATUS_META: Record<PaymentStatus, { label: string; color: string; bg: string }> = {
-  confirmed: { label: 'Confirmado', color: '#16a34a', bg: '#dcfce7' },
-  pending:   { label: 'Pendente',   color: '#d97706', bg: '#fef3c7' },
-  failed:    { label: 'Falhou',     color: '#dc2626', bg: '#fee2e2' },
-  cancelled: { label: 'Cancelado',  color: '#6b7280', bg: '#f3f4f6' },
+  confirmed: { label: 'Confirmado',    color: '#16a34a', bg: '#dcfce7' },
+  pending:   { label: 'Pendente',      color: '#d97706', bg: '#fef3c7' },
+  rejected:  { label: 'Recusado',      color: '#dc2626', bg: '#fee2e2' },
+  cancelled: { label: 'Cancelado',     color: '#6b7280', bg: '#f3f4f6' },
+  failed:    { label: 'Com problema',  color: '#dc2626', bg: '#fee2e2' },
 };
 
 const METHOD_META: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -340,8 +341,8 @@ export default function AdminPage() {
                 </thead>
                 <tbody>
                   {registrations.map((r) => {
-                    const sm = STATUS_META[r.status];
-                    const mm = r.mp_payment_method ? METHOD_META[r.mp_payment_method] : null;
+                    const sm = STATUS_META[r.status] ?? { label: r.status ?? '?', color: '#6b7280', bg: '#f3f4f6' };
+                    const mm = r.gateway_method ? (METHOD_META[r.gateway_method] ?? null) : null;
                     return (
                       <tr
                         key={r.id}

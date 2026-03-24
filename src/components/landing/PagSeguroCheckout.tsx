@@ -17,7 +17,7 @@ declare global {
   }
 }
 
-export type PaymentMethodType = 'PIX' | 'BOLETO' | 'CREDIT_CARD';
+export type PaymentMethodType = 'PIX' | 'CREDIT_CARD';
 
 export interface PagSeguroPayload {
   payment_method: PaymentMethodType;
@@ -29,9 +29,15 @@ export interface PagSeguroPayload {
   installments?: number;
 }
 
+// Parcelamento sem juros disponível a partir deste valor (centavos)
+const INSTALLMENT_MIN_CENTS = 12000; // R$ 120,00
+const MAX_INSTALLMENTS = 4;
+
 interface Props {
   onSubmit: (payload: PagSeguroPayload) => Promise<void>;
+  onReset?: () => void;
   loading: boolean;
+  totalCents: number;
 }
 
 function formatCpf(raw: string) {
@@ -64,16 +70,6 @@ const METHOD_TABS: { id: PaymentMethodType; label: string; icon: React.ReactNode
     ),
   },
   {
-    id: 'BOLETO',
-    label: 'Boleto',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2" />
-        <path d="M3 9h18M9 21V9" />
-      </svg>
-    ),
-  },
-  {
     id: 'CREDIT_CARD',
     label: 'Cartão',
     icon: (
@@ -102,7 +98,7 @@ function waitForPagSeguro(maxMs = 8000): Promise<boolean> {
   });
 }
 
-export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
+export default function PagSeguroCheckout({ onSubmit, onReset, loading, totalCents }: Props) {
   const [method, setMethod] = useState<PaymentMethodType>('PIX');
   const [cpf, setCpf] = useState('');
   const [fieldError, setFieldError] = useState<string | null>(null);
@@ -112,6 +108,15 @@ export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
   const [cardHolder, setCardHolder] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvv, setCardCvv] = useState('');
+  const [selectedInstallments, setSelectedInstallments] = useState(1);
+
+  const allowInstallments = method === 'CREDIT_CARD' && totalCents >= INSTALLMENT_MIN_CENTS;
+  const installmentOptions = allowInstallments
+    ? Array.from({ length: MAX_INSTALLMENTS }, (_, i) => i + 1).map((n) => ({
+        n,
+        amountCents: Math.ceil(totalCents / n),
+      }))
+    : [];
 
   const cpfDigits = cpf.replace(/\D/g, '');
   const cpfValid = cpfDigits.length === 11;
@@ -159,7 +164,7 @@ export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
         encrypted_card: result.encryptedCard,
         card_holder: cardHolder.toUpperCase(),
         card_security_code: cardCvv,
-        installments: 1,
+        installments: allowInstallments ? selectedInstallments : 1,
       });
     } else {
       await onSubmit({ payment_method: method, cpf });
@@ -178,7 +183,7 @@ export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
             <button
               key={tab.id}
               type="button"
-              onClick={() => { setMethod(tab.id); setFieldError(null); }}
+              onClick={() => { setMethod(tab.id); setFieldError(null); onReset?.(); }}
               className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl text-xs font-semibold font-body transition-all duration-200"
               style={
                 method === tab.id
@@ -222,27 +227,6 @@ export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
               <p className="font-body font-semibold text-sm" style={{ color: '#065f46' }}>Pagamento instantâneo</p>
               <p className="font-body text-xs mt-0.5 leading-relaxed" style={{ color: '#059669' }}>
                 QR Code gerado na hora. Pague pelo app do banco e a confirmação é automática em segundos.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* ── Boleto info ── */}
-        {method === 'BOLETO' && (
-          <div
-            className="rounded-2xl p-4 flex items-start gap-3"
-            style={{ background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.2)' }}
-          >
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: 'rgba(59,130,246,0.12)', color: '#3b82f6' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <path d="M3 9h18M9 21V9" />
-              </svg>
-            </div>
-            <div>
-              <p className="font-body font-semibold text-sm" style={{ color: '#1e40af' }}>Boleto bancário</p>
-              <p className="font-body text-xs mt-0.5 leading-relaxed" style={{ color: '#3b82f6' }}>
-                Vencimento: <strong>3 de Abril de 2026</strong>. Compensação em até 3 dias úteis.
               </p>
             </div>
           </div>
@@ -331,6 +315,35 @@ export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
           </div>
         )}
 
+        {/* ── Parcelamento (cartão, acima de R$120) ── */}
+        {allowInstallments && (
+          <div>
+            <label className="block text-xs font-semibold font-body mb-2 tracking-wide uppercase" style={{ color: '#6b7280' }}>
+              Parcelamento (sem juros)
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {installmentOptions.map(({ n, amountCents }) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setSelectedInstallments(n)}
+                  className="rounded-xl px-3 py-2.5 text-sm font-body transition-all duration-150 text-left"
+                  style={
+                    selectedInstallments === n
+                      ? { background: '#1e3a5f', color: 'white', border: '2px solid #1e3a5f' }
+                      : { background: 'white', color: '#4b5563', border: '2px solid #e5e7eb' }
+                  }
+                >
+                  <span className="font-semibold">{n}x </span>
+                  <span>R$ {(amountCents / 100).toFixed(2).replace('.', ',')}</span>
+                  {n === 1 && <span className="block text-[10px] opacity-70">à vista</span>}
+                  {n > 1 && <span className="block text-[10px] opacity-70">sem juros</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ── Erro de campo ── */}
         {fieldError && (
           <p className="text-xs font-body rounded-lg px-3 py-2 flex items-center gap-2"
@@ -359,8 +372,8 @@ export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
             </>
           ) : method === 'PIX' ? (
             'Gerar QR Code PIX →'
-          ) : method === 'BOLETO' ? (
-            'Gerar Boleto →'
+          ) : allowInstallments && selectedInstallments > 1 ? (
+            `Pagar ${selectedInstallments}x de R$ ${(Math.ceil(totalCents / selectedInstallments) / 100).toFixed(2).replace('.', ',')} →`
           ) : (
             'Pagar com Cartão →'
           )}
@@ -373,6 +386,20 @@ export default function PagSeguroCheckout({ onSubmit, loading }: Props) {
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
           Pagamento 100% seguro via PagSeguro
+        </div>
+
+        {/* Aviso tesouraria */}
+        <div
+          className="rounded-xl px-4 py-3 flex items-start gap-2.5"
+          style={{ background: 'rgba(201,151,58,0.06)', border: '1px solid rgba(201,151,58,0.18)' }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9973a" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+            <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <p className="text-xs font-body leading-relaxed" style={{ color: '#92681a' }}>
+            Precisa de outra forma de pagamento?{' '}
+            <strong>Entre em contato com a tesouraria da AD Essência</strong> antes do evento.
+          </p>
         </div>
 
       </div>

@@ -29,18 +29,18 @@ interface FormData {
 // ─── Step Indicator ─────────────────────────────────────────────────────────
 function StepIndicator({ current }: { current: Step }) {
   const steps = [
-    { num: 1, label: 'Dados Pessoais' },
-    { num: 2, label: 'Participantes' },
-    { num: 3, label: 'Pagamento' },
+    { num: 1, label: 'Dados', labelFull: 'Dados Pessoais' },
+    { num: 2, label: 'Participantes', labelFull: 'Participantes' },
+    { num: 3, label: 'Pagamento', labelFull: 'Pagamento' },
   ];
 
   return (
-    <div className="flex items-center justify-center gap-0 mb-8">
+    <div className="flex items-center justify-center mb-8 w-full px-2">
       {steps.map((s, i) => (
         <div key={s.num} className="flex items-center">
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center" style={{ minWidth: 48 }}>
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold font-body transition-all duration-300"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold font-body transition-all duration-300 flex-shrink-0"
               style={
                 current === s.num
                   ? { background: '#c9973a', color: 'white', boxShadow: '0 0 0 4px rgba(201,151,58,0.2)' }
@@ -56,16 +56,20 @@ function StepIndicator({ current }: { current: Step }) {
               ) : s.num}
             </div>
             <span
-              className="text-[10px] font-body mt-1 whitespace-nowrap"
-              style={{ color: current === s.num ? '#c9973a' : '#9ca3af', fontWeight: current === s.num ? 600 : 400 }}
+              className="text-[9px] font-body mt-1 text-center leading-tight"
+              style={{
+                color: current === s.num ? '#c9973a' : '#9ca3af',
+                fontWeight: current === s.num ? 600 : 400,
+                maxWidth: 56,
+              }}
             >
-              {s.label}
+              {s.labelFull}
             </span>
           </div>
           {i < steps.length - 1 && (
             <div
-              className="w-16 h-[1px] mb-4 mx-1 transition-all duration-500"
-              style={{ background: current > s.num ? '#c9973a' : '#e5e7eb' }}
+              className="h-[1px] mb-5 mx-1 flex-1 transition-all duration-500"
+              style={{ background: current > s.num ? '#c9973a' : '#e5e7eb', minWidth: 16, maxWidth: 48 }}
             />
           )}
         </div>
@@ -145,6 +149,7 @@ function PixResult({
   const [copied, setCopied] = useState(false);
   const [seconds, setSeconds] = useState(30 * 60);
   const [checking, setChecking] = useState(false);
+  const [checkMsg, setCheckMsg] = useState<string | null>(null);
 
   // Contagem regressiva
   useEffect(() => {
@@ -153,12 +158,16 @@ function PixResult({
     return () => clearTimeout(t);
   }, [seconds]);
 
-  // Polling automático a cada 8s para detectar pagamento
+  // Polling automático: a cada 8s consulta apenas o DB; a cada 40s sincroniza com o PagBank
   useEffect(() => {
     if (!registrationId) return;
+    let tick = 0;
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`/api/checkout/status?id=${registrationId}`);
+        tick += 1;
+        // A cada 5 ticks (40s) faz sync com PagBank; nos demais só lê o DB
+        const sync = tick % 5 === 0;
+        const res = await fetch(`/api/checkout/status?id=${registrationId}${sync ? '&sync=true' : ''}`);
         const data = await res.json();
         if (data.status === 'confirmed') {
           clearInterval(interval);
@@ -183,12 +192,20 @@ function PixResult({
   const checkNow = async () => {
     if (!registrationId) return;
     setChecking(true);
+    setCheckMsg(null);
     try {
-      const res = await fetch(`/api/checkout/status?id=${registrationId}`);
+      // Sempre consulta o PagBank diretamente ao clicar
+      const res = await fetch(`/api/checkout/status?id=${registrationId}&sync=true`);
       const data = await res.json();
       if (data.status === 'confirmed') {
         router.push('/obrigado');
+      } else {
+        setCheckMsg('Pagamento ainda não identificado. Se você já pagou, aguarde alguns segundos e tente novamente.');
+        setTimeout(() => setCheckMsg(null), 6000);
       }
+    } catch {
+      setCheckMsg('Erro ao verificar. Verifique sua conexão e tente novamente.');
+      setTimeout(() => setCheckMsg(null), 4000);
     } finally {
       setChecking(false);
     }
@@ -245,14 +262,29 @@ function PixResult({
         )}
       </button>
       {registrationId && (
-        <button
-          onClick={checkNow}
-          disabled={checking}
-          className="w-full rounded-xl py-2.5 text-sm font-semibold font-body transition-all duration-200 flex items-center justify-center gap-2"
-          style={{ background: 'rgba(16,185,129,0.1)', color: '#059669', border: '1px solid rgba(16,185,129,0.3)' }}
-        >
-          {checking ? 'Verificando...' : '✓ Já paguei — verificar confirmação'}
-        </button>
+        <>
+          <button
+            onClick={checkNow}
+            disabled={checking}
+            className="w-full rounded-xl py-2.5 text-sm font-semibold font-body transition-all duration-200 flex items-center justify-center gap-2"
+            style={{ background: 'rgba(16,185,129,0.1)', color: '#059669', border: '1px solid rgba(16,185,129,0.3)' }}
+          >
+            {checking ? (
+              <>
+                <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
+                Verificando no PagBank...
+              </>
+            ) : '✓ Já paguei — verificar confirmação'}
+          </button>
+          {checkMsg && (
+            <p className="text-xs font-body text-center mt-2 px-2 py-2 rounded-lg"
+              style={{ background: '#fef9c3', color: '#854d0e', border: '1px solid #fde68a' }}>
+              {checkMsg}
+            </p>
+          )}
+        </>
       )}
       <p className="text-xs font-body text-gray-500 mt-4">
         A confirmação é automática. Você receberá um e-mail após o pagamento.
@@ -261,75 +293,23 @@ function PixResult({
   );
 }
 
-// ─── Boleto Result ────────────────────────────────────────────────────────────
-function BoletoResult({ boletoUrl, barcode }: { boletoUrl?: string; barcode?: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const copy = async () => {
-    if (!barcode) return;
-    await navigator.clipboard.writeText(barcode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-          </svg>
-        </div>
-        <div>
-          <h3 className="font-display text-xl font-semibold text-navy">Boleto gerado!</h3>
-          <p className="text-xs font-body text-gray-500">Vencimento: 3 de Abril de 2026</p>
-        </div>
-      </div>
-      {boletoUrl && (
-        <a
-          href={boletoUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block w-full text-center rounded-xl py-3 text-sm font-semibold font-body mb-3 transition-all duration-200 hover:opacity-90"
-          style={{ background: '#1e3a5f', color: 'white' }}
-        >
-          Abrir Boleto PDF
-        </a>
-      )}
-      {barcode && (
-        <div>
-          <p className="text-xs font-body text-gray-500 mb-1">Código de barras:</p>
-          <div
-            className="rounded-lg p-3 font-mono text-xs text-gray-700 break-all mb-2"
-            style={{ background: 'rgba(0,0,0,0.04)' }}
-          >
-            {barcode}
-          </div>
-          <button
-            onClick={copy}
-            className="w-full rounded-xl py-2.5 text-sm font-semibold font-body transition-all duration-200 flex items-center justify-center gap-2"
-            style={{ background: copied ? '#10b981' : '#2d6a9f', color: 'white' }}
-          >
-            {copied ? '✓ Copiado!' : 'Copiar código de barras'}
-          </button>
-        </div>
-      )}
-      <p className="text-xs font-body text-gray-500 mt-4">
-        Você receberá um e-mail de confirmação após o pagamento ser identificado (até 3 dias úteis).
-      </p>
-    </div>
-  );
-}
 
 // ─── Main Form ────────────────────────────────────────────────────────────────
 export default function RegistrationForm({ selectedTier, onTierChange }: RegistrationFormProps) {
   const router = useRouter();
   const formRef = useRef<HTMLDivElement>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentResult, setPaymentResult] = useState<CheckoutResponse | null>(null);
+
+  // Rola para a mensagem de erro quando ela aparece
+  useEffect(() => {
+    if (error && errorRef.current) {
+      errorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [error]);
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -450,7 +430,6 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Erro inesperado. Tente novamente.';
       setError(msg);
-      throw err;
     } finally {
       setLoading(false);
     }
@@ -472,7 +451,7 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
         )}
 
         {error && (
-          <div className="mb-4 rounded-xl px-4 py-3 text-sm font-body flex items-start gap-2" style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626' }}>
+          <div ref={errorRef} className="mb-4 rounded-xl px-4 py-3 text-sm font-body flex items-start gap-2" style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 mt-0.5">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
@@ -519,7 +498,15 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
                 type="tel"
                 placeholder="(11) 99999-9999"
                 value={formData.phone}
-                onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
+                  let masked = digits;
+                  if (digits.length > 0) masked = '(' + digits;
+                  if (digits.length > 2) masked = '(' + digits.slice(0, 2) + ') ' + digits.slice(2);
+                  if (digits.length > 7) masked = '(' + digits.slice(0, 2) + ') ' + digits.slice(2, 7) + '-' + digits.slice(7);
+                  setFormData((p) => ({ ...p, phone: masked }));
+                }}
+                maxLength={15}
               />
             </div>
 
@@ -680,16 +667,12 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
         {/* ── Step 3: Pagamento ── */}
         {step === 3 && (
           <div className="animate-fade-in">
-            {paymentResult ? (
-              paymentResult.pixQrCode ? (
-                <PixResult
-                  pixQrCode={paymentResult.pixQrCode}
-                  pixQrCodeBase64={paymentResult.pixQrCodeBase64}
-                  registrationId={paymentResult.registrationId}
-                />
-              ) : (
-                <BoletoResult boletoUrl={paymentResult.boletoUrl} barcode={paymentResult.barcode} />
-              )
+            {paymentResult?.pixQrCode ? (
+              <PixResult
+                pixQrCode={paymentResult.pixQrCode}
+                pixQrCodeBase64={paymentResult.pixQrCodeBase64}
+                registrationId={paymentResult.registrationId}
+              />
             ) : (
               <div>
                 <div className="mb-4">
@@ -721,7 +704,9 @@ export default function RegistrationForm({ selectedTier, onTierChange }: Registr
 
                 <PagSeguroCheckout
                   onSubmit={handlePaymentSubmit}
+                  onReset={() => setError(null)}
                   loading={loading}
+                  totalCents={totalCents}
                 />
 
                 <button

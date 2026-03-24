@@ -13,8 +13,14 @@ function createTransport() {
 }
 
 export async function sendConfirmationEmail(registration: Registration): Promise<void> {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    console.warn('[Email] GMAIL_USER ou GMAIL_APP_PASSWORD não configurados — e-mail não enviado.');
+    return;
+  }
+
   const tier = TICKET_TIERS[registration.ticket_type];
-  const fromEmail = process.env.GMAIL_USER ?? 'noreply@gmail.com';
+  const fromEmail = process.env.GMAIL_USER;
+  const amountDisplay = `R$ ${(registration.amount_cents / 100).toFixed(2).replace('.', ',')}`;
 
   const participantsHtml =
     registration.participant_names.length > 0
@@ -56,7 +62,7 @@ export async function sendConfirmationEmail(registration: Registration): Promise
         <table style="width:100%;border-collapse:collapse;">
           <tr><td style="padding:6px 0;color:#666;font-size:13px;width:40%;">Data do Evento</td><td style="padding:6px 0;color:#333;font-size:13px;font-weight:600;">5 de Abril de 2026 — Domingo</td></tr>
           <tr><td style="padding:6px 0;color:#666;font-size:13px;">Tipo de Ingresso</td><td style="padding:6px 0;color:#333;font-size:13px;font-weight:600;">${tier.label}</td></tr>
-          <tr><td style="padding:6px 0;color:#666;font-size:13px;">Valor Pago</td><td style="padding:6px 0;color:#333;font-size:13px;font-weight:600;">${tier.priceDisplay}</td></tr>
+          <tr><td style="padding:6px 0;color:#666;font-size:13px;">Valor Pago</td><td style="padding:6px 0;color:#333;font-size:13px;font-weight:600;">${amountDisplay}</td></tr>
           <tr><td style="padding:6px 0;color:#666;font-size:13px;vertical-align:top;">Participantes</td><td style="padding:6px 0;color:#333;font-size:13px;">${participantsHtml}</td></tr>
         </table>
       </div>

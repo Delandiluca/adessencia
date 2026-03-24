@@ -25,9 +25,11 @@ function friendlyError(rawMsg: string, code?: string): string {
     return 'CPF inválido. Verifique e tente novamente.';
   if (m.includes('unknown or unexpected'))
     return 'Erro interno ao gerar cobrança. Tente novamente.';
+  if (m.includes('card') || m.includes('encrypted'))
+    return 'Pagamento recusado. Verifique os dados do cartão ou use outro cartão.';
 
   if (code === '40001') return 'Dados de pagamento incompletos. Tente novamente.';
-  if (code === '40002') return 'Valor ou parâmetro inválido.';
+  if (code === '40002') return 'Pagamento recusado. Verifique os dados do cartão ou use outro cartão.';
   if (code === '40003') return 'Parâmetro desconhecido. Tente novamente.';
 
   return rawMsg || 'Erro ao processar pagamento. Tente novamente.';
@@ -72,7 +74,7 @@ export interface CreateOrderParams {
   referenceId: string;
   customer: PagSeguroCustomer;
   amountCents: number;
-  paymentMethod: 'PIX' | 'BOLETO' | 'CREDIT_CARD';
+  paymentMethod: 'PIX' | 'CREDIT_CARD';
   encryptedCard?: string;
   cardHolder?: string;
   cardSecurityCode?: string;
@@ -114,6 +116,27 @@ function pixExpirationDate(): string {
   return '2026-04-05T23:59:59-03:00';
 }
 
+/**
+ * Consulta o status de um pedido PagBank pelo order ID (ORDE_...).
+ * Usado pelo polling de PIX — GET /orders/{orderId} retorna status PAID quando pago.
+ */
+export async function getOrderStatus(orderId: string): Promise<string> {
+  try {
+    const res = await psRequest(`/orders/${encodeURIComponent(orderId)}`, null, 'GET') as {
+      status?: string;
+      charges?: { status?: string }[];
+    };
+    // Pedidos PagBank para PIX não têm status no nível raiz —
+    // o status real fica em charges[0].status (ex: "PAID").
+    const status = res.charges?.[0]?.status ?? res.status ?? 'WAITING';
+    console.log('[PagBank] getOrderStatus', orderId, '→', status);
+    return status;
+  } catch (err) {
+    console.error('[PagBank] getOrderStatus error:', err);
+    return 'WAITING';
+  }
+}
+
 export async function createOrder(params: CreateOrderParams): Promise<PagSeguroOrderResponse> {
   const cpf = params.customer.tax_id.replace(/\D/g, '');
   const notificationUrls = params.notificationUrl ? [params.notificationUrl] : [];
@@ -143,46 +166,6 @@ export async function createOrder(params: CreateOrderParams): Promise<PagSeguroO
         expiration_date: pixExpirationDate(),
       }],
       notification_urls: notificationUrls,
-    }) as Promise<PagSeguroOrderResponse>;
-  }
-
-  // ── BOLETO: usa charges ───────────────────────────────────────────────────
-  if (params.paymentMethod === 'BOLETO') {
-    return psRequest('/orders', {
-      reference_id: params.referenceId,
-      customer,
-      items,
-      charges: [{
-        reference_id: `charge-${params.referenceId}`,
-        description: 'Domingo Essencial ADESSÊNCIA — 05/04/2026',
-        amount: { value: params.amountCents, currency: 'BRL' },
-        payment_method: {
-          type: 'BOLETO',
-          boleto: {
-            due_date: '2026-04-03',
-            instruction_lines: {
-              line_1: 'Ingresso Domingo Essencial — ADESSÊNCIA',
-              line_2: 'Vencimento: 03/04/2026',
-            },
-            holder: {
-              name: params.customer.name,
-              tax_id: cpf,
-              email: params.customer.email,
-              address: {
-                street: 'Rua Samuel Levi',
-                number: '145',
-                locality: 'Centro',
-                city: 'Cachoeiro de Itapemirim',
-                region: 'Espirito Santo',
-                region_code: 'ES',
-                country: 'BRA',
-                postal_code: '29300000',
-              },
-            },
-          },
-        },
-        notification_urls: notificationUrls,
-      }],
     }) as Promise<PagSeguroOrderResponse>;
   }
 
