@@ -25,7 +25,7 @@ export interface PagSeguroPayload {
   // Credit card fields
   encrypted_card?: string;
   card_holder?: string;
-  card_security_code?: string;
+  // card_security_code removido: CVV está embutido no encrypted_card (PCI DSS)
   installments?: number;
 }
 
@@ -144,8 +144,23 @@ export default function PagSeguroCheckout({ onSubmit, onReset, loading, totalCen
       const [expMonth, expYear] = cardExpiry.split('/');
       const fullYear = expYear?.length === 2 ? `20${expYear}` : expYear;
 
+      // Busca a chave pública de produção dinamicamente da API do PagBank
+      let publicKey = '';
+      try {
+        const pkRes = await fetch('/api/pagseguro-public-key');
+        const pkData = await pkRes.json() as { public_key?: string };
+        publicKey = pkData.public_key ?? '';
+      } catch {
+        setFieldError('Erro ao conectar com o sistema de pagamento. Tente novamente.');
+        return;
+      }
+      if (!publicKey) {
+        setFieldError('Erro ao obter chave de segurança. Tente novamente.');
+        return;
+      }
+
       const result = window.PagSeguro.encryptCard({
-        publicKey: process.env.NEXT_PUBLIC_PAGSEGURO_PUBLIC_KEY ?? '',
+        publicKey,
         holder: cardHolder.toUpperCase(),
         number: cardNumber.replace(/\s/g, ''),
         expMonth: expMonth ?? '',
@@ -158,12 +173,13 @@ export default function PagSeguroCheckout({ onSubmit, onReset, loading, totalCen
         return;
       }
 
+      // card_security_code NÃO é enviado ao servidor — o CVV já está embutido
+      // no encrypted_card gerado pelo SDK PagSeguro (PCI DSS compliance)
       await onSubmit({
         payment_method: 'CREDIT_CARD',
         cpf,
         encrypted_card: result.encryptedCard,
         card_holder: cardHolder.toUpperCase(),
-        card_security_code: cardCvv,
         installments: allowInstallments ? selectedInstallments : 1,
       });
     } else {
@@ -361,7 +377,7 @@ export default function PagSeguroCheckout({ onSubmit, onReset, loading, totalCen
           onClick={handleSubmit}
           disabled={loading}
           className="w-full rounded-xl py-4 text-sm font-semibold font-body text-white transition-all duration-200 hover:opacity-90 active:scale-[0.99] disabled:opacity-60 flex items-center justify-center gap-2"
-          style={{ background: 'linear-gradient(135deg, #c9973a, #e0b460)' }}
+          style={{ background: 'linear-gradient(135deg, #C8860A, #D4991A)' }}
         >
           {loading ? (
             <>
@@ -393,7 +409,7 @@ export default function PagSeguroCheckout({ onSubmit, onReset, loading, totalCen
           className="rounded-xl px-4 py-3 flex items-start gap-2.5"
           style={{ background: 'rgba(201,151,58,0.06)', border: '1px solid rgba(201,151,58,0.18)' }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9973a" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C8860A" strokeWidth="2" className="flex-shrink-0 mt-0.5">
             <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
           <p className="text-xs font-body leading-relaxed" style={{ color: '#92681a' }}>

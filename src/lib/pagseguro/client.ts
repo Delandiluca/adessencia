@@ -39,7 +39,8 @@ async function psRequest(path: string, body: unknown, method: 'POST' | 'GET' = '
   const token = process.env.PAGSEGURO_TOKEN;
   if (!token) throw new Error('PAGSEGURO_TOKEN não configurado.');
 
-  console.log('[PagBank] →', method, BASE_URL + path, JSON.stringify(body));
+  // Log de diagnóstico — dados sensíveis (CPF, corpo) omitidos intencionalmente
+  console.log('[PagBank] →', method, BASE_URL + path);
 
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
@@ -51,7 +52,7 @@ async function psRequest(path: string, body: unknown, method: 'POST' | 'GET' = '
   });
 
   const json = await res.json().catch(() => ({}));
-  console.log('[PagBank] ←', res.status, JSON.stringify(json));
+  console.log('[PagBank] ←', res.status, res.ok ? 'OK' : 'ERROR', JSON.stringify(json));
 
   if (!res.ok) {
     const errBody = json as { error_messages?: { description?: string; code?: string }[] };
@@ -77,7 +78,7 @@ export interface CreateOrderParams {
   paymentMethod: 'PIX' | 'CREDIT_CARD';
   encryptedCard?: string;
   cardHolder?: string;
-  cardSecurityCode?: string;
+  // cardSecurityCode removido: CVV embutido no encryptedCard (PCI DSS)
   installments?: number;
   notificationUrl?: string;
 }
@@ -185,7 +186,7 @@ export async function createOrder(params: CreateOrderParams): Promise<PagSeguroO
         soft_descriptor: 'ADESSENCIA',
         card: {
           encrypted: params.encryptedCard,
-          security_code: params.cardSecurityCode,
+          // security_code omitido: o CVV já está embutido no encrypted token (PCI DSS)
           holder: { name: params.cardHolder },
           store: false,
         },

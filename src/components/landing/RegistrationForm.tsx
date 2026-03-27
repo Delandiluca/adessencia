@@ -44,9 +44,9 @@ function StepIndicator({ current }: { current: Step }) {
               className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold font-body transition-all duration-300"
               style={
                 current === s.num
-                  ? { background: '#c9973a', color: 'white', boxShadow: '0 0 0 4px rgba(201,151,58,0.2)' }
+                  ? { background: '#C8860A', color: 'white', boxShadow: '0 0 0 4px rgba(201,151,58,0.2)' }
                   : current > s.num
-                  ? { background: '#c9973a', color: 'white' }
+                  ? { background: '#C8860A', color: 'white' }
                   : { background: '#f3f4f6', color: '#9ca3af' }
               }
             >
@@ -59,7 +59,7 @@ function StepIndicator({ current }: { current: Step }) {
             <span
               className="text-[10px] font-body mt-1 text-center leading-tight w-full"
               style={{
-                color: current === s.num ? '#c9973a' : '#9ca3af',
+                color: current === s.num ? '#C8860A' : '#9ca3af',
                 fontWeight: current === s.num ? 600 : 400,
               }}
             >
@@ -70,7 +70,7 @@ function StepIndicator({ current }: { current: Step }) {
           {i < steps.length - 1 && (
             <div
               className="h-[1px] flex-1 mb-5 mx-1 transition-all duration-500"
-              style={{ background: current > s.num ? '#c9973a' : '#e5e7eb' }}
+              style={{ background: current > s.num ? '#C8860A' : '#e5e7eb' }}
             />
           )}
         </div>
@@ -130,7 +130,7 @@ function TierBadge({ tier, totalCents }: { tier: TicketType; totalCents: number 
         <p className="text-xs font-body mt-0.5" style={{ color: '#9ca3af' }}>{t.description}</p>
       </div>
       <div className="text-right">
-        <span className="font-display text-2xl font-light" style={{ color: '#c9973a' }}>{formatReais(totalCents)}</span>
+        <span className="font-display text-2xl font-light" style={{ color: '#C8860A' }}>{formatReais(totalCents)}</span>
       </div>
     </div>
   );

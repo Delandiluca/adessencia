@@ -7,11 +7,15 @@ export function validateWebhookSignature(
 ): boolean {
   const secret = process.env.PAGSEGURO_WEBHOOK_SECRET;
 
-  // No sandbox ou sem secret configurado, aceita sem validação
-  // (PagBank sandbox não envia assinatura HMAC real)
-  if (!secret || process.env.PAGSEGURO_SANDBOX === 'true') {
-    console.warn('[PagSeguro Webhook] Validação de assinatura ignorada (sandbox ou sem secret).');
-    return true;
+  // Em produção, secret é obrigatório — rejeita se não configurado
+  if (!secret) {
+    // Aceita sem validação apenas quando explicitamente em sandbox E sem secret (ambiente de dev local)
+    if (process.env.PAGSEGURO_SANDBOX === 'true') {
+      console.warn('[PagSeguro Webhook] Sandbox sem secret — validação ignorada (apenas dev).');
+      return true;
+    }
+    console.error('[PagSeguro Webhook] PAGSEGURO_WEBHOOK_SECRET não configurado em produção!');
+    return false;
   }
 
   if (!signatureHeader) return false;

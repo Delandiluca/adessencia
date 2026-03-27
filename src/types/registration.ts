@@ -16,6 +16,7 @@ export interface Registration {
   gateway_method: PaymentMethod | null;
   gateway_status: string | null;
   gateway_status_detail: string | null;
+  installments: number | null;   // número de parcelas (cartão); null = à vista / PIX
   created_at: string;
   confirmed_at: string | null;
   updated_at: string;

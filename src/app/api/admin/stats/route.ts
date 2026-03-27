@@ -1,44 +1,54 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 
-function isAuthenticated(request: NextRequest): boolean {
-  const session = request.cookies.get('admin_session')?.value;
-  return session === process.env.ADMIN_PASSWORD;
-}
+export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
-  if (!isAuthenticated(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export async function GET() {
   const supabase = createServerSupabase();
-  const { data, error } = await supabase
-    .from('registrations')
-    .select('status, amount_cents');
 
-  if (error) {
+  // Queries separadas por status — mais confiável do que iterar todas as linhas
+  const [confirmedRes, pendingRes, failedRes] = await Promise.all([
+    supabase
+      .from('registrations')
+      .select('amount_cents')
+      .eq('status', 'confirmed'),
+    supabase
+      .from('registrations')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending'),
+    supabase
+      .from('registrations')
+      .select('*', { count: 'exact', head: true })
+      .in('status', ['rejected', 'failed', 'cancelled']),
+  ]);
+
+  if (confirmedRes.error || pendingRes.error || failedRes.error) {
+    console.error('[admin/stats]', confirmedRes.error ?? pendingRes.error ?? failedRes.error);
     return NextResponse.json({ error: 'DB error' }, { status: 500 });
   }
 
-  const stats = {
-    totalConfirmed: 0,
-    totalPending: 0,
-    totalFailed: 0,
-    revenueConfirmedCents: 0,
-    revenuePendingCents: 0,
-  };
+  const confirmedRows = confirmedRes.data ?? [];
+  const revenueConfirmedCents = confirmedRows.reduce(
+    (sum, r) => sum + (r.amount_cents ?? 0),
+    0
+  );
 
-  for (const row of data ?? []) {
-    if (row.status === 'confirmed') {
-      stats.totalConfirmed++;
-      stats.revenueConfirmedCents += row.amount_cents;
-    } else if (row.status === 'pending') {
-      stats.totalPending++;
-      stats.revenuePendingCents += row.amount_cents;
-    } else {
-      stats.totalFailed++;
-    }
-  }
+  // Pendentes: busca valor total também
+  const pendingAmtRes = await supabase
+    .from('registrations')
+    .select('amount_cents')
+    .eq('status', 'pending');
 
-  return NextResponse.json(stats);
+  const revenuePendingCents = (pendingAmtRes.data ?? []).reduce(
+    (sum, r) => sum + (r.amount_cents ?? 0),
+    0
+  );
+
+  return NextResponse.json({
+    totalConfirmed:        confirmedRows.length,
+    totalPending:          pendingRes.count ?? 0,
+    totalFailed:           failedRes.count ?? 0,
+    revenueConfirmedCents,
+    revenuePendingCents,
+  });
 }

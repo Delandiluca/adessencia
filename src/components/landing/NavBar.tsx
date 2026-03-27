@@ -63,7 +63,7 @@ export default function NavBar() {
         <button
           onClick={() => scrollTo('#inscricao')}
           className="hidden md:inline-flex items-center gap-2 px-5 py-2 rounded-full font-body font-semibold text-sm text-white flex-shrink-0 transition-all duration-200 hover:scale-105"
-          style={{ background: 'linear-gradient(135deg, #c9973a, #e0b460)', boxShadow: '0 4px 16px rgba(201,151,58,0.35)' }}
+          style={{ background: 'linear-gradient(135deg, #C8860A, #D4991A)', boxShadow: '0 4px 16px rgba(201,151,58,0.35)' }}
         >
           Quero Me Inscrever
         </button>
@@ -110,7 +110,7 @@ export default function NavBar() {
           <button
             onClick={() => scrollTo('#inscricao')}
             className="w-full py-2.5 rounded-full font-body font-semibold text-sm text-white mt-1"
-            style={{ background: 'linear-gradient(135deg, #c9973a, #e0b460)' }}
+            style={{ background: 'linear-gradient(135deg, #C8860A, #D4991A)' }}
           >
             Quero Me Inscrever
           </button>

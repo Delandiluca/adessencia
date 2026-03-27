@@ -8,7 +8,7 @@ const ITEMS = [
     unit: 'refeições',
     title: 'Refeições Completas',
     desc: 'Café da manhã das famílias, almoço comunitário, café da tarde e jantar de encerramento.',
-    color: '#c9973a',
+    color: '#C8860A',
     glow: 'rgba(201,151,58,0.18)',
     gradientBg: 'linear-gradient(135deg, rgba(201,151,58,0.12) 0%, rgba(201,151,58,0.03) 100%)',
     icon: (
@@ -117,7 +117,7 @@ export default function IncludedSection() {
             transition: 'opacity 0.7s ease, transform 0.7s cubic-bezier(0.16,1,0.3,1)',
           }}
         >
-          <p className="font-body font-semibold tracking-[0.35em] uppercase text-xs mb-3" style={{ color: '#c9973a' }}>
+          <p className="font-body font-semibold tracking-[0.35em] uppercase text-xs mb-3" style={{ color: '#C8860A' }}>
             Domingo Essencial
           </p>
           <h2
@@ -128,7 +128,7 @@ export default function IncludedSection() {
           </h2>
           <div className="flex items-center justify-center gap-3 mt-5">
             <div className="h-px flex-1 max-w-[60px]" style={{ background: 'linear-gradient(to right, transparent, rgba(201,151,58,0.4))' }} />
-            <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,0 10,10 0,10" fill="#c9973a" /></svg>
+            <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,0 10,10 0,10" fill="#C8860A" /></svg>
             <div className="h-px flex-1 max-w-[60px]" style={{ background: 'linear-gradient(to left, transparent, rgba(201,151,58,0.4))' }} />
           </div>
           <p className="font-body text-sm mt-5 max-w-xl mx-auto leading-relaxed" style={{ color: '#6b7280' }}>

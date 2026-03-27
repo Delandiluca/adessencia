@@ -105,7 +105,7 @@ export default function AdminPage() {
     <main className="min-h-screen" style={{ background: '#f0ede8' }}>
 
       {/* Gold top line */}
-      <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, transparent, #c9973a 30%, #e0b460 50%, #c9973a 70%, transparent)' }} />
+      <div className="h-[3px]" style={{ background: 'linear-gradient(90deg, transparent, #C8860A 30%, #D4991A 50%, #C8860A 70%, transparent)' }} />
 
       {/* ── Header ── */}
       <header
@@ -125,7 +125,7 @@ export default function AdminPage() {
               Essência da Adoração
             </span>
             <span className="hidden sm:inline ml-2 text-[10px] font-body font-semibold tracking-widest uppercase px-2 py-0.5 rounded-full"
-              style={{ background: 'rgba(201,151,58,0.1)', color: '#c9973a', border: '1px solid rgba(201,151,58,0.2)' }}>
+              style={{ background: 'rgba(201,151,58,0.1)', color: '#C8860A', border: '1px solid rgba(201,151,58,0.2)' }}>
               Painel Admin
             </span>
           </div>
@@ -148,7 +148,7 @@ export default function AdminPage() {
           <button
             onClick={() => window.open('/api/admin/export', '_blank')}
             className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-semibold font-body transition-all duration-150 hover:opacity-80"
-            style={{ background: 'rgba(201,151,58,0.1)', color: '#c9973a', border: '1px solid rgba(201,151,58,0.25)' }}
+            style={{ background: 'rgba(201,151,58,0.1)', color: '#C8860A', border: '1px solid rgba(201,151,58,0.25)' }}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -226,7 +226,7 @@ export default function AdminPage() {
                 value: fmtCurrency(stats.revenueConfirmedCents),
                 sub: `${stats.totalConfirmed} pagamento${stats.totalConfirmed !== 1 ? 's' : ''} confirmado${stats.totalConfirmed !== 1 ? 's' : ''}`,
                 subLabel: '',
-                color: '#c9973a',
+                color: '#C8860A',
                 accentBg: '#fffbf2',
                 iconBg: 'rgba(201,151,58,0.12)',
                 bigValue: true,
@@ -309,7 +309,7 @@ export default function AdminPage() {
         >
           {loading ? (
             <div className="py-24 flex flex-col items-center gap-3">
-              <svg className="animate-spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9973a" strokeWidth="2.5">
+              <svg className="animate-spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8860A" strokeWidth="2.5">
                 <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
               </svg>
               <p className="font-body text-sm" style={{ color: '#9ca3af' }}>Carregando inscrições...</p>
@@ -328,7 +328,7 @@ export default function AdminPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ background: '#faf9f7', borderBottom: '1px solid #f0ede8' }}>
-                    {['Inscrito', 'Contato', 'Ingresso', 'Valor', 'Método', 'Status', 'Data'].map((h) => (
+                    {['Inscrito', 'Contato', 'Ingresso', 'Valor', 'Método', 'Status', 'Inscrição', 'Confirmação'].map((h) => (
                       <th
                         key={h}
                         className="px-4 py-3 text-left font-body font-semibold text-[10px] tracking-[0.15em] uppercase whitespace-nowrap"
@@ -380,19 +380,27 @@ export default function AdminPage() {
 
                         {/* Valor */}
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="font-display font-semibold text-sm" style={{ color: '#c9973a' }}>
+                          <span className="font-display font-semibold text-sm" style={{ color: '#C8860A' }}>
                             {fmtCurrency(r.amount_cents)}
                           </span>
                         </td>
 
-                        {/* Método */}
+                        {/* Método + Parcelas */}
                         <td className="px-4 py-3">
                           {mm ? (
-                            <span className="inline-flex items-center gap-1.5 font-body text-xs px-2.5 py-1 rounded-lg font-medium"
-                              style={{ background: '#f3f4f6', color: '#6b7280' }}>
-                              {mm.icon}
-                              {mm.label}
-                            </span>
+                            <div className="flex flex-col gap-1">
+                              <span className="inline-flex items-center gap-1.5 font-body text-xs px-2.5 py-1 rounded-lg font-medium"
+                                style={{ background: '#f3f4f6', color: '#6b7280' }}>
+                                {mm.icon}
+                                {mm.label}
+                              </span>
+                              {r.installments && r.installments > 1 && (
+                                <span className="font-body text-[10px] px-2 py-0.5 rounded-md font-semibold self-start"
+                                  style={{ background: 'rgba(30,58,95,0.07)', color: '#1e3a5f' }}>
+                                  {r.installments}× parcelas
+                                </span>
+                              )}
+                            </div>
                           ) : (
                             <span style={{ color: '#d1d5db' }}>—</span>
                           )}
@@ -409,11 +417,22 @@ export default function AdminPage() {
                           </span>
                         </td>
 
-                        {/* Data */}
+                        {/* Data de inscrição */}
                         <td className="px-4 py-3 whitespace-nowrap">
                           <span className="font-body text-xs" style={{ color: '#9ca3af' }}>
                             {fmtDate(r.created_at)}
                           </span>
+                        </td>
+
+                        {/* Data de confirmação */}
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {r.confirmed_at ? (
+                            <span className="font-body text-xs font-medium" style={{ color: '#16a34a' }}>
+                              {fmtDate(r.confirmed_at)}
+                            </span>
+                          ) : (
+                            <span style={{ color: '#d1d5db' }}>—</span>
+                          )}
                         </td>
                       </tr>
                     );

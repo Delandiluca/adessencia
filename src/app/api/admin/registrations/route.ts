@@ -1,16 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
-
-function isAuthenticated(request: NextRequest): boolean {
-  const session = request.cookies.get('admin_session')?.value;
-  return session === process.env.ADMIN_PASSWORD;
-}
+// Autenticação centralizada no middleware — /api/admin/* já está protegido
 
 export async function GET(request: NextRequest) {
-  if (!isAuthenticated(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1'));
@@ -25,7 +17,6 @@ export async function GET(request: NextRequest) {
     .range(offset, offset + limit - 1);
 
   if (status && status !== 'all') {
-    // 'failed' agrupa todos os estados problemáticos (rejected, failed, cancelled)
     if (status === 'failed') {
       query = query.in('status', ['rejected', 'failed', 'cancelled']);
     } else {

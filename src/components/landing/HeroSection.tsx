@@ -69,7 +69,7 @@ export default function HeroSection() {
         className="absolute top-0 left-0 right-0 h-[2px]"
         style={{
           background:
-            'linear-gradient(90deg, transparent, #c9973a 25%, #e0b460 50%, #c9973a 75%, transparent)',
+            'linear-gradient(90deg, transparent, #C8860A 25%, #D4991A 50%, #C8860A 75%, transparent)',
           zIndex: 2,
         }}
       />
@@ -103,7 +103,7 @@ export default function HeroSection() {
             <div className="h-px w-10" style={{ background: 'rgba(201,151,58,0.5)' }} />
             <span
               className="font-body text-xs font-semibold tracking-[0.35em] uppercase"
-              style={{ color: '#e0b460' }}
+              style={{ color: '#D4991A' }}
             >
               Evento Especial
             </span>
@@ -128,14 +128,14 @@ export default function HeroSection() {
           <div className="flex items-center justify-center gap-4 my-4">
             <div
               className="h-px flex-1 max-w-[80px]"
-              style={{ background: 'linear-gradient(to right, transparent, #c9973a)' }}
+              style={{ background: 'linear-gradient(to right, transparent, #C8860A)' }}
             />
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#c9973a" opacity="0.8">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#C8860A" opacity="0.8">
               <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
             </svg>
             <div
               className="h-px flex-1 max-w-[80px]"
-              style={{ background: 'linear-gradient(to left, transparent, #c9973a)' }}
+              style={{ background: 'linear-gradient(to left, transparent, #C8860A)' }}
             />
           </div>
 
@@ -164,7 +164,7 @@ export default function HeroSection() {
           <div
             className="inline-flex items-center gap-2 px-5 py-2 rounded-full"
             style={{
-              background: 'linear-gradient(135deg, #c9973a, #e0b460)',
+              background: 'linear-gradient(135deg, #C8860A, #D4991A)',
               boxShadow: '0 4px 20px rgba(201,151,58,0.45)',
             }}
           >
@@ -207,7 +207,7 @@ export default function HeroSection() {
             onClick={scrollToForm}
             className="group inline-flex items-center gap-3 rounded-full px-10 py-4 font-body font-semibold text-white text-base transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
             style={{
-              background: 'linear-gradient(135deg, #c9973a 0%, #e0b460 100%)',
+              background: 'linear-gradient(135deg, #C8860A 0%, #D4991A 100%)',
               boxShadow: '0 8px 32px rgba(201,151,58,0.5), 0 2px 8px rgba(0,0,0,0.2)',
             }}
           >
@@ -237,7 +237,7 @@ export default function HeroSection() {
               style={{
                 width:      i === current ? 20 : 7,
                 height:     7,
-                background: i === current ? '#e0b460' : 'rgba(255,255,255,0.35)',
+                background: i === current ? '#D4991A' : 'rgba(255,255,255,0.35)',
                 border:     'none',
                 cursor:     'pointer',
                 padding:    0,

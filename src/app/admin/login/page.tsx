@@ -38,7 +38,7 @@ export default function AdminLoginPage() {
     >
       {/* Decorative gold line top */}
       <div className="fixed top-0 left-0 right-0 h-[3px]"
-        style={{ background: 'linear-gradient(90deg, transparent, #c9973a 30%, #e0b460 50%, #c9973a 70%, transparent)' }} />
+        style={{ background: 'linear-gradient(90deg, transparent, #C8860A 30%, #D4991A 50%, #C8860A 70%, transparent)' }} />
 
       <div className="w-full max-w-sm">
 
@@ -65,7 +65,7 @@ export default function AdminLoginPage() {
               Painel Administrativo
             </p>
             <div className="mt-3 px-3 py-1 rounded-full text-[10px] font-body font-semibold tracking-wider uppercase"
-              style={{ background: 'rgba(201,151,58,0.2)', color: '#e0b460', border: '1px solid rgba(201,151,58,0.3)' }}>
+              style={{ background: 'rgba(201,151,58,0.2)', color: '#D4991A', border: '1px solid rgba(201,151,58,0.3)' }}>
               Domingo Essencial · 2026
             </div>
           </div>
@@ -121,7 +121,7 @@ export default function AdminLoginPage() {
                 type="submit"
                 disabled={loading || !password}
                 className="w-full rounded-xl py-3.5 text-sm font-semibold font-body transition-all duration-200 hover:opacity-90 active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #c9973a, #e0b460)', color: '#1a0e00' }}
+                style={{ background: 'linear-gradient(135deg, #C8860A, #D4991A)', color: '#1a0e00' }}
               >
                 {loading ? (
                   <>

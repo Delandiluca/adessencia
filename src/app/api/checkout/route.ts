@@ -5,15 +5,19 @@ import { createOrder } from '@/lib/pagseguro/client';
 import { calculateTotalCents, TICKET_TIERS } from '@/lib/utils/pricing';
 import { TicketType } from '@/types/registration';
 import { sendConfirmationEmail } from '@/lib/resend/emails';
+import { isValidCpf } from '@/lib/utils/cpf';
 
 const checkoutSchema = z.object({
   // Dados do inscrito
-  name: z.string().min(2),
-  email: z.string().email(),
-  phone: z.string().min(10),
-  cpf: z.string().min(11).max(14),
+  name: z.string().min(2).max(120),
+  email: z.string().email().max(254),
+  phone: z.string().min(10).max(20),
+  cpf: z.string().min(11).max(14).refine(
+    (v) => isValidCpf(v),
+    { message: 'CPF inválido.' }
+  ),
   ticket_type: z.enum(['individual', 'casal', 'familia']),
-  participant_names: z.array(z.string().min(1)).min(1).max(20),
+  participant_names: z.array(z.string().min(1).max(200)).min(1).max(20),
   children_count: z.number().int().min(0).max(30).default(0),
 
   // Dados do pagamento
@@ -21,7 +25,7 @@ const checkoutSchema = z.object({
   // Somente para cartão de crédito
   encrypted_card: z.string().optional(),
   card_holder: z.string().optional(),
-  card_security_code: z.string().optional(),
+  // card_security_code removido do schema: CVV não deve trafegar pelo servidor (PCI DSS)
   installments: z.number().int().min(1).max(12).optional(),
 });
 
@@ -42,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     // Valida cartão de crédito
     if (data.payment_method === 'CREDIT_CARD') {
-      if (!data.encrypted_card || !data.card_holder || !data.card_security_code) {
+      if (!data.encrypted_card || !data.card_holder) {
         return NextResponse.json(
           { error: 'Dados do cartão incompletos.' },
           { status: 400 }
@@ -63,6 +67,7 @@ export async function POST(request: NextRequest) {
         amount_cents: amountCents,
         participant_names: data.participant_names,
         children_count: data.children_count,
+        installments: data.payment_method === 'CREDIT_CARD' ? (data.installments ?? 1) : null,
         status: 'pending',
       })
       .select()
@@ -93,7 +98,7 @@ export async function POST(request: NextRequest) {
         paymentMethod: data.payment_method,
         encryptedCard: data.encrypted_card,
         cardHolder: data.card_holder,
-        cardSecurityCode: data.card_security_code,
+        // cardSecurityCode não enviado: CVV já está no encrypted_card (PCI DSS)
         installments: data.installments,
         notificationUrl: isPublicUrl
           ? `${appUrl}/api/webhooks/pagseguro`
@@ -222,8 +227,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(responseData);
   } catch (err) {
     if (err instanceof z.ZodError) {
+      // Retorna a primeira mensagem de validação diretamente (ex: "CPF inválido.")
+      const firstMessage = err.issues[0]?.message ?? 'Dados inválidos.';
       return NextResponse.json(
-        { error: 'Dados inválidos.', details: err.flatten() },
+        { error: firstMessage },
         { status: 400 }
       );
     }

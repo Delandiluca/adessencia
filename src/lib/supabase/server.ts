@@ -11,5 +11,10 @@ export function createServerSupabase() {
 
   return createClient(url, key, {
     auth: { persistSession: false },
+    // Desativa o Data Cache interno do Next.js 14 para todas as queries
+    // (por padrão o Next.js cacheia fetch() calls entre requests)
+    global: {
+      fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }),
+    },
   });
 }

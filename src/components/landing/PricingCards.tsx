@@ -43,7 +43,7 @@ function CheckIcon({ dark }: { dark: boolean }) {
       <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
         <path
           d="M1 3l2 2 4-4"
-          stroke={dark ? '#e0b460' : '#1e3a5f'}
+          stroke={dark ? '#D4991A' : '#1e3a5f'}
           strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -74,7 +74,7 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
                 ? '#fffcf5'
                 : '#ffffff',
               border: isSelected
-                ? '2px solid #c9973a'
+                ? '2px solid #C8860A'
                 : isHighlighted
                 ? '1px solid rgba(30,58,95,0.4)'
                 : '1px solid #e5e7eb',
@@ -92,7 +92,7 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
                 <span
                   className="inline-block px-4 py-1 rounded-full text-xs font-semibold font-body tracking-wide text-white"
-                  style={{ background: 'linear-gradient(90deg, #c9973a, #e0b460)' }}
+                  style={{ background: 'linear-gradient(90deg, #C8860A, #D4991A)' }}
                 >
                   {isSelected ? '✓ Selecionado' : '⭐ Mais popular'}
                 </span>
@@ -104,7 +104,7 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
                 <span
                   className="inline-block px-4 py-1 rounded-full text-xs font-semibold font-body tracking-wide"
-                  style={{ background: '#fffcf5', color: '#c9973a', border: '1.5px solid #c9973a' }}
+                  style={{ background: '#fffcf5', color: '#C8860A', border: '1.5px solid #C8860A' }}
                 >
                   ✓ Selecionado
                 </span>
@@ -141,7 +141,7 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
                     className="font-display font-light leading-none"
                     style={{
                       fontSize: '3.2rem',
-                      color: isDark ? '#e0b460' : '#1e3a5f',
+                      color: isDark ? '#D4991A' : '#1e3a5f',
                     }}
                   >
                     {tier.price / 100}
@@ -159,7 +159,7 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
                     className="inline-block text-xs font-body font-medium px-2.5 py-0.5 rounded-full"
                     style={{
                       background: 'rgba(201,151,58,0.15)',
-                      color: '#c9973a',
+                      color: '#C8860A',
                       border: '1px solid rgba(201,151,58,0.3)',
                     }}
                   >
@@ -196,7 +196,7 @@ export default function PricingCards({ selectedTier, onSelect }: PricingCardsPro
                 style={
                   isDark || isSelected
                     ? {
-                        background: 'linear-gradient(135deg, #c9973a, #e0b460)',
+                        background: 'linear-gradient(135deg, #C8860A, #D4991A)',
                         color: 'white',
                         boxShadow: '0 4px 20px rgba(201,151,58,0.35)',
                       }

@@ -90,6 +90,8 @@ export default function LandingPage() {
           className="py-28 px-6 relative overflow-hidden"
           style={{ background: 'linear-gradient(160deg, #0b1829 0%, #0f2240 55%, #0b1829 100%)' }}
         >
+          {/* Crimson top accent */}
+          <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: 'linear-gradient(90deg, transparent, #B83235 25%, #c93d40 50%, #B83235 75%, transparent)', zIndex: 2 }} />
           {/* Decorative radial glows */}
           <div className="absolute inset-0 pointer-events-none" style={{
             backgroundImage: 'radial-gradient(ellipse at 15% 40%, rgba(201,151,58,0.06) 0%, transparent 55%), radial-gradient(ellipse at 85% 70%, rgba(30,58,95,0.25) 0%, transparent 55%)',
@@ -99,7 +101,7 @@ export default function LandingPage() {
 
             {/* ── Header ── */}
             <div className="text-center mb-16">
-              <p className="font-body font-semibold tracking-[0.35em] uppercase text-xs mb-3" style={{ color: '#c9973a' }}>
+              <p className="font-body font-semibold tracking-[0.35em] uppercase text-xs mb-3" style={{ color: '#C8860A' }}>
                 5 de Abril de 2026
               </p>
               <h2
@@ -110,7 +112,7 @@ export default function LandingPage() {
               </h2>
               <div className="flex items-center justify-center gap-3 mt-5">
                 <div className="h-px flex-1 max-w-[60px]" style={{ background: 'linear-gradient(to right, transparent, rgba(201,151,58,0.5))' }} />
-                <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,0 10,10 0,10" fill="#c9973a" /></svg>
+                <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,0 10,10 0,10" fill="#C8860A" /></svg>
                 <div className="h-px flex-1 max-w-[60px]" style={{ background: 'linear-gradient(to left, transparent, rgba(201,151,58,0.5))' }} />
               </div>
             </div>
@@ -157,7 +159,7 @@ export default function LandingPage() {
 
                           {/* Time column */}
                           <div className="hidden sm:flex flex-col items-end justify-center w-20 flex-shrink-0 pr-4">
-                            <span className="font-body font-bold text-xs leading-tight tabular-nums" style={{ color: '#e0b460' }}>
+                            <span className="font-body font-bold text-xs leading-tight tabular-nums" style={{ color: '#D4991A' }}>
                               {item.time}
                             </span>
                           </div>
@@ -168,7 +170,7 @@ export default function LandingPage() {
                               className="w-3 h-3 rounded-full flex-shrink-0"
                               style={{
                                 background: '#0f2240',
-                                border: '2px solid #c9973a',
+                                border: '2px solid #C8860A',
                                 boxShadow: '0 0 10px rgba(201,151,58,0.45)',
                               }}
                             />
@@ -186,7 +188,7 @@ export default function LandingPage() {
                             {/* Icon bubble */}
                             <div
                               className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:scale-110"
-                              style={{ background: 'rgba(201,151,58,0.12)', color: '#e0b460' }}
+                              style={{ background: 'rgba(201,151,58,0.12)', color: '#D4991A' }}
                             >
                               {item.icon}
                             </div>
@@ -194,7 +196,7 @@ export default function LandingPage() {
                             {/* Text */}
                             <div className="flex-1 min-w-0">
                               {/* Mobile time */}
-                              <span className="sm:hidden inline-block font-body font-bold text-[10px] tracking-wide mb-1 px-2 py-0.5 rounded-full" style={{ color: '#e0b460', background: 'rgba(224,180,96,0.1)', border: '1px solid rgba(224,180,96,0.2)' }}>
+                              <span className="sm:hidden inline-block font-body font-bold text-[10px] tracking-wide mb-1 px-2 py-0.5 rounded-full" style={{ color: '#D4991A', background: 'rgba(224,180,96,0.1)', border: '1px solid rgba(224,180,96,0.2)' }}>
                                 {item.time}
                               </span>
                               <p className="font-body font-semibold text-white text-sm md:text-base leading-snug">
@@ -230,14 +232,14 @@ export default function LandingPage() {
 
             {/* Heading */}
             <div className="text-center mb-14">
-              <p className="text-xs font-body font-semibold tracking-[0.35em] uppercase mb-3" style={{ color: '#c9973a' }}>
+              <p className="text-xs font-body font-semibold tracking-[0.35em] uppercase mb-3" style={{ color: '#C8860A' }}>
                 Inscrição
               </p>
               <h2 className="font-display text-navy" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', fontWeight: 600, lineHeight: 1.15 }}>
                 Escolha seu ingresso
               </h2>
               <div className="flex justify-center mt-4 mb-5">
-                <div className="h-[2px] w-12 rounded-full" style={{ background: 'linear-gradient(to right, transparent, #c9973a, transparent)' }} />
+                <div className="h-[2px] w-12 rounded-full" style={{ background: 'linear-gradient(to right, transparent, #C8860A, transparent)' }} />
               </div>
               <p className="font-body text-sm max-w-md mx-auto" style={{ color: '#6b7280' }}>
                 Todas as refeições do dia estão incluídas. Crianças até 12 anos entram gratuitamente.
@@ -252,7 +254,7 @@ export default function LandingPage() {
               {selectedTier ? (
                 <>
                   <div className="text-center mb-10">
-                    <p className="text-xs font-body font-semibold tracking-[0.35em] uppercase mb-3" style={{ color: '#c9973a' }}>
+                    <p className="text-xs font-body font-semibold tracking-[0.35em] uppercase mb-3" style={{ color: '#C8860A' }}>
                       Quase lá!
                     </p>
                     <h3 className="font-display text-navy font-semibold" style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)' }}>
@@ -274,7 +276,9 @@ export default function LandingPage() {
         <LocationSection />
 
         {/* ── Footer ─────────────────────────────────────────────────── */}
-        <footer className="py-16 px-6" style={{ background: '#f4f3fa' }}>
+        <footer className="py-16 px-6 relative" style={{ background: '#f4f3fa' }}>
+          {/* Crimson top accent */}
+          <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: 'linear-gradient(90deg, transparent, #B83235 25%, #c93d40 50%, #B83235 75%, transparent)' }} />
           <div className="max-w-5xl mx-auto">
             <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-10">
 
@@ -289,7 +293,7 @@ export default function LandingPage() {
                     style={{ objectFit: 'contain', opacity: 0.9 }}
                   />
                   <div>
-                    <p className="font-body font-semibold text-sm" style={{ color: '#1e3a5f' }}>Essência da Adoração</p>
+                    <p className="font-body font-semibold text-sm" style={{ color: '#B83235' }}>Essência da Adoração</p>
                     <p className="font-body text-xs" style={{ color: '#9ca3af' }}>Assembleia de Deus</p>
                   </div>
                 </div>
@@ -329,7 +333,7 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row gap-10 text-center md:text-left">
                 {/* Nav */}
                 <div>
-                  <p className="font-body font-semibold text-xs tracking-widest uppercase mb-3" style={{ color: '#c9973a' }}>Navegação</p>
+                  <p className="font-body font-semibold text-xs tracking-widest uppercase mb-3" style={{ color: '#C8860A' }}>Navegação</p>
                   <div className="flex flex-col gap-2">
                     {NAV_FOOTER.map((l) => (
                       <a key={l.label} href={l.href} className="font-body text-sm transition-colors hover:opacity-60" style={{ color: '#1e3a5f' }}>
@@ -340,7 +344,7 @@ export default function LandingPage() {
                 </div>
                 {/* Event info */}
                 <div>
-                  <p className="font-body font-semibold text-xs tracking-widest uppercase mb-3" style={{ color: '#c9973a' }}>Evento</p>
+                  <p className="font-body font-semibold text-xs tracking-widest uppercase mb-3" style={{ color: '#C8860A' }}>Evento</p>
                   <p className="font-body text-sm text-navy">Domingo Essencial</p>
                   <p className="font-body text-xs mt-1" style={{ color: '#9ca3af' }}>5 de Abril de 2026</p>
                   <p className="font-body text-xs mt-2 text-navy">Pastor Jessé Batista</p>

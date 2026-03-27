@@ -19,7 +19,7 @@ export default function ObrigadoPage() {
       {/* Gold top border */}
       <div
         className="fixed top-0 left-0 right-0 h-[3px]"
-        style={{ background: 'linear-gradient(90deg, transparent, #c9973a 30%, #e0b460 50%, #c9973a 70%, transparent)' }}
+        style={{ background: 'linear-gradient(90deg, transparent, #C8860A 30%, #D4991A 50%, #C8860A 70%, transparent)' }}
       />
 
       <div
@@ -37,7 +37,7 @@ export default function ObrigadoPage() {
           />
           <div
             className="w-24 h-24 rounded-full flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #c9973a, #e0b460)' }}
+            style={{ background: 'linear-gradient(135deg, #C8860A, #D4991A)' }}
           >
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12" />
@@ -55,8 +55,8 @@ export default function ObrigadoPage() {
         <div className="flex items-center justify-center gap-4 my-4">
           <div className="h-[1px] w-12 bg-gradient-to-r from-transparent to-gold" />
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-            <rect x="8.5" y="0" width="3" height="20" fill="#c9973a" opacity="0.8" />
-            <rect x="0" y="8.5" width="20" height="3" fill="#c9973a" opacity="0.8" />
+            <rect x="8.5" y="0" width="3" height="20" fill="#C8860A" opacity="0.8" />
+            <rect x="0" y="8.5" width="20" height="3" fill="#C8860A" opacity="0.8" />
           </svg>
           <div className="h-[1px] w-12 bg-gradient-to-l from-transparent to-gold" />
         </div>

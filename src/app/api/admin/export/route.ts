@@ -1,18 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { registrationsToCSV } from '@/lib/utils/csv';
 import { Registration } from '@/types/registration';
+// Autenticação centralizada no middleware — /api/admin/* já está protegido
 
-function isAuthenticated(request: NextRequest): boolean {
-  const session = request.cookies.get('admin_session')?.value;
-  return session === process.env.ADMIN_PASSWORD;
-}
+export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
-  if (!isAuthenticated(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export async function GET() {
   const supabase = createServerSupabase();
   const { data, error } = await supabase
     .from('registrations')
