@@ -39,8 +39,8 @@ async function psRequest(path: string, body: unknown, method: 'POST' | 'GET' = '
   const token = process.env.PAGSEGURO_TOKEN;
   if (!token) throw new Error('PAGSEGURO_TOKEN não configurado.');
 
-  // Log de diagnóstico — dados sensíveis (CPF, corpo) omitidos intencionalmente
-  console.log('[PagBank] →', method, BASE_URL + path);
+  // Log completo para homologação PagBank — sem abreviações
+  console.log('[PagBank] → REQUEST', method, BASE_URL + path, JSON.stringify(body ?? null));
 
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
@@ -52,7 +52,7 @@ async function psRequest(path: string, body: unknown, method: 'POST' | 'GET' = '
   });
 
   const json = await res.json().catch(() => ({}));
-  console.log('[PagBank] ←', res.status, res.ok ? 'OK' : 'ERROR', JSON.stringify(json));
+  console.log('[PagBank] ← RESPONSE', res.status, JSON.stringify(json));
 
   if (!res.ok) {
     const errBody = json as { error_messages?: { description?: string; code?: string }[] };
