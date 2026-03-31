@@ -6,8 +6,8 @@ export const TICKET_TIERS = {
   individual: {
     label: 'Individual',
     description: '1 adulto',
-    price: 100, // R$1,00 — TEMPORÁRIO para teste em PRD
-    priceDisplay: 'R$ 1,00',
+    price: 5000, // R$50,00
+    priceDisplay: 'R$ 50,00',
     maxParticipants: 1,
     highlight: false,
     savings: null,
