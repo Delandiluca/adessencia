@@ -30,7 +30,7 @@ const nextConfig = {
               "img-src 'self' data: blob:",
               "font-src 'self'",
               "connect-src 'self' https://api.pagseguro.com https://sandbox.api.pagseguro.com",
-              "frame-src 'none'",
+              "frame-src https://www.google.com https://maps.google.com",
               "frame-ancestors 'none'",
               "object-src 'none'",
               "base-uri 'self'",
