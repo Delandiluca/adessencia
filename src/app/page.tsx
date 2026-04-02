@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import Image from 'next/image';
 import NavBar from '@/components/landing/NavBar';
 import HeroSection from '@/components/landing/HeroSection';
@@ -63,6 +64,14 @@ const NAV_FOOTER = [
 ];
 
 export default function LandingPage() {
+  const contactCardRef = useRef<HTMLDivElement>(null);
+
+  const handleTierSelect = () => {
+    setTimeout(() => {
+      contactCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
+  };
+
   return (
     <>
       <NavBar />
@@ -233,11 +242,11 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* Pricing cards — apenas visual, sem seleção */}
-            <PricingCards selectedTier={null} onSelect={() => {}} />
+            {/* Pricing cards */}
+            <PricingCards selectedTier={null} onSelect={handleTierSelect} />
 
-            {/* Pagamento temporariamente indisponível */}
-            <div className="max-w-xl mx-auto mt-4">
+            {/* Card de contato com a tesouraria */}
+            <div ref={contactCardRef} className="max-w-xl mx-auto mt-4 scroll-mt-8">
               <div
                 className="rounded-2xl px-8 py-10 text-center"
                 style={{ background: '#f9f7ff', border: '1.5px solid rgba(200,134,10,0.18)' }}
