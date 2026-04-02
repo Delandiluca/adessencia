@@ -4,6 +4,7 @@ import Image from 'next/image';
 import NavBar from '@/components/landing/NavBar';
 import HeroSection from '@/components/landing/HeroSection';
 import IncludedSection from '@/components/landing/IncludedSection';
+import PricingCards from '@/components/landing/PricingCards';
 import LocationSection from '@/components/landing/LocationSection';
 
 const SCHEDULE = [
@@ -231,6 +232,9 @@ export default function LandingPage() {
                 Todas as refeições do dia estão incluídas. Crianças até 12 anos entram gratuitamente.
               </p>
             </div>
+
+            {/* Pricing cards — apenas visual, sem seleção */}
+            <PricingCards selectedTier={null} onSelect={() => {}} />
 
             {/* Pagamento temporariamente indisponível */}
             <div className="max-w-xl mx-auto mt-4">
